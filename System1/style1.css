@@ -1,0 +1,92 @@
+﻿body {
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+    font-size:14px;
+    user-select: none;
+}
+
+#loginbtn {
+    font-size: 20px;
+    color: white;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    background-color: black;
+}
+
+    #loginbtn:hover {
+        background-color: mediumpurple;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#title1 {
+    font-family: 'Microsoft JhengHei';
+    font-weight: bold;
+    color: white;
+    font-size: 36px;
+}
+
+#welcomeLabel {
+    color: white;
+    float: right;
+    margin-right: 15px;
+    margin-top: 16px;
+    font-size: 16px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+}
+
+#myTable th:first-child {
+    font-weight: bold;
+}
+
+#myTable tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* 滑入行效果 */
+#myTable tbody tr:hover {
+    background-color: #eaeaea;
+}
+
+#web2btn {
+    font-size: 16px;
+    border-radius: 3px;
+    width: 215px;
+    height: 50px;
+}
+
+    #web2btn:hover {
+        color: white;
+        background-color: #0197f6;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#web3btn {
+    font-size: 16px;
+    border-radius: 3px;
+    width: 215px;
+    height: 50px;
+}
+
+    #web3btn:hover {
+        color: white;
+        background-color: #4dccbd;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#logoutbtn {
+    font-size: 16px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    float: right;
+    margin-right: 15px;
+    margin-top: 13px;
+}
+
+    #logoutbtn:hover {
+        color: white;
+        background-color: red;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }

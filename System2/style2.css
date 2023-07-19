@@ -1,0 +1,51 @@
+﻿body {
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+    font-size: 12px;
+    user-select: none;
+}
+
+#loginbtn {
+    font-size: 20px;
+    color: white;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    background-color: black;
+}
+
+    #loginbtn:hover {
+        background-color: mediumpurple;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#title2 {
+    font-family: 'Microsoft JhengHei';
+    font-weight: bold;
+    color: white;
+    font-size: 36px;
+}
+
+#welcomeLabel {
+    color: white;
+    float: right;
+    margin-right: 15px;
+    margin-top: 16px;
+    font-size: 16px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+}
+
+#logoutbtn {
+    font-size: 16px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    float: right;
+    margin-right: 15px;
+    margin-top: 13px;
+}
+
+    #logoutbtn:hover {
+        color: white;
+        background-color: red;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }

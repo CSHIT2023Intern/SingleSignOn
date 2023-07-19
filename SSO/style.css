@@ -1,0 +1,96 @@
+﻿body {
+    font-family: 'Times New Roman', 'DFKai-sb';
+    user-select: none;
+}
+
+#loginForm {
+    background-color: whitesmoke;
+    box-shadow: 0px 0px 1000px white;
+    margin: 0 auto;
+    width: 500px;
+    text-align: center;
+}
+
+#indexForm {
+    background-color: black;
+    box-shadow: 0px 0px 50px grey;
+    margin: 0 auto;
+    width: 500px;
+    text-align: center;
+}
+
+#title {
+    font-size: 35px;
+}
+
+#loginbtn {
+    font-size: 20px;
+    color: white;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    background-color: black;
+}
+
+    #loginbtn:hover {
+        background-color: mediumpurple;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#logoutbtn {
+    font-size: 18px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+}
+
+    #logoutbtn:hover {
+        color: white;
+        background-color: mediumpurple;
+        box-shadow: 0px 0px 20px grey;
+        cursor: pointer;
+    }
+
+#web1btn {
+    font-size: 18px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    width:300px;
+    height:50px;
+}
+
+    #web1btn:hover {
+        color: white;
+        background-color: #f42272;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#web2btn {
+    font-size: 18px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    width: 300px;
+    height: 50px;
+}
+
+    #web2btn:hover {
+        color: white;
+        background-color: #0197f6;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
+
+#web3btn {
+    font-size: 18px;
+    font-family: 'Times New Roman', 'DFKai-sb';
+    border-radius: 3px;
+    width: 300px;
+    height: 50px;
+}
+
+    #web3btn:hover {
+        color: white;
+        background-color: #4dccbd;
+        box-shadow: 0px 0px 10px grey;
+        cursor: pointer;
+    }
