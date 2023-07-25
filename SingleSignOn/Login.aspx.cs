@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Configuration;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Identity.Client;
 
 namespace SingleSignOn
 {
@@ -55,10 +55,23 @@ namespace SingleSignOn
             }
             else
             {
+                /*
+                string errorMessage = "帳號或密碼錯誤！";
+                string safeErrorMessage = Page.ClientScript.GetSafeJsString(errorMessage);
+                string script = $"<script>alert('{safeErrorMessage}');</script>";
+                ClientScript.RegisterStartupScript(this.GetType(), "LoginError", script);
+                */
+                
                 string errorMessage = "帳號或密碼錯誤！";
                 string script = $"<script>alert('{errorMessage}');</script>";
                 ClientScript.RegisterStartupScript(this.GetType(), "LoginError", script);
             }
+        }
+
+        protected void Btn_AzureAD_Click(object sender, EventArgs e)
+        {
+            // 使用ASP.NET Web應用程式(.NET Framework 4.7.2)的MVC架構建立的專案的URL進行跳轉
+            Response.Redirect("https://localhost:44342/");
         }
 
         private bool AuthenticateUser(string userAcc, string userPwd)
