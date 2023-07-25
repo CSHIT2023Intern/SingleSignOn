@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System2", "..\System2\Syste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System3", "..\System3\System3.csproj", "{84B5BA57-F573-4C40-A426-76B659CCEFC4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure", "..\Azure\Azure.csproj", "{21734DC5-2816-447A-B121-4F620C5FE3C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{84B5BA57-F573-4C40-A426-76B659CCEFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84B5BA57-F573-4C40-A426-76B659CCEFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84B5BA57-F573-4C40-A426-76B659CCEFC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21734DC5-2816-447A-B121-4F620C5FE3C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21734DC5-2816-447A-B121-4F620C5FE3C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21734DC5-2816-447A-B121-4F620C5FE3C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21734DC5-2816-447A-B121-4F620C5FE3C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
