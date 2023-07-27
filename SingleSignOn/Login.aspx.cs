@@ -20,6 +20,11 @@ namespace SingleSignOn
                 {
                     // 將returnUrl存儲在Session中
                     Session["ReturnUrl"] = returnUrl;
+
+                    if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                    {
+                        Response.Redirect(returnUrl);
+                    }
                 }
             }
         }
@@ -64,16 +69,11 @@ namespace SingleSignOn
 
         protected void Btn_AzureAD_Click(object sender, EventArgs e)
         {
-            string returnUrl = Session["ReturnUrl"].ToString();
-            if (Session["ReturnUrl"] != null)
-            {
-                // 跳轉至Azure AD
-                Response.Redirect("https://localhost:44342/?requestedUrl=" + returnUrl);
-            }
-            else
-            {
-                Response.Redirect("https://localhost:44342/");
-            }
+            string returnUrl = Request.QueryString["returnUrl"];
+            // 將 returnUrl 存儲於 cookie 中
+            HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+            Response.Cookies.Add(returnUrlCookie);
+            Response.Redirect("https://localhost:44342/");
         }
 
         private bool AuthenticateUser(string userAcc, string userPwd)
@@ -150,12 +150,21 @@ namespace SingleSignOn
 
             public static void CentralizedLogout()
             {
+                // 清除儲存在cookie中的token
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName)
                 {
                     Expires = DateTime.Now.AddDays(-1),
                     Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
+
+                // 清除儲存在cookie中的returnUrl
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie")
+                {
+                    Expires = DateTime.Now.AddDays(-1),
+                    Domain = "localhost"
+                };
+                HttpContext.Current.Response.Cookies.Add(returnUrlCookie);
             }
         }
 

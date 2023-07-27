@@ -15,7 +15,7 @@ namespace SingleSignOn
                 if (Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
                     title.Text = "Welcome to System1！";
-                    btnLogout.Visible = true;
+                    Btn_Logout.Visible = true;
                 }
                 else
                 {

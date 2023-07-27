@@ -45,7 +45,7 @@
         .tab{
             height: 55px;
         }
-        #btnLogout{
+        #Btn_Logout{
             color: white;  
             background: #f7b3cb;
             width: 200px;
@@ -55,7 +55,7 @@
             border-radius: 5px;
             border: 0px;
         }
-        #btnLogout:hover{
+        #Btn_Logout:hover{
             background: #cff3fd;
         }
     </style>
@@ -73,7 +73,7 @@
                 <form runat="server">
                     <div class="tab"></div>
                     <div class="tab"></div>
-                    <asp:Button ID="btnLogout" runat="server" Text="登出" OnClick="Btn_Logout_Click" />
+                    <asp:Button ID="Btn_Logout" runat="server" Text="登出" OnClick="Btn_Logout_Click" />
                 </form>
             </div>
         </div>

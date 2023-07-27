@@ -33,8 +33,6 @@ namespace Azure
                 ClientId = clientId,
                 Authority = authority,
                 ResponseType = OpenIdConnectResponseType.IdToken,
-                // RedirectUri = "https://localhost:44396/login1.aspx", // 設定為你的MVC應用程式的回調URL
-                PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的回調URL
                 TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證Issuer
@@ -50,7 +48,6 @@ namespace Azure
                     {
                         // 處理驗證成功的情況，如果需要，可以在這裡同步資料庫的用戶信息
 
-                        // 獲取使用者帳號名稱
                         string userAcc = context.AuthenticationTicket.Identity.Name;
 
                         TokenManager tokenManager = new TokenManager();
@@ -62,16 +59,16 @@ namespace Azure
 
                         // 取消Owin Middleware的預設行為
                         context.HandleResponse();
-                        
-                        // 根據請求的頁面確定重定向URL
-                        string requestedUrl = context.Request.Query["requestedUrl"];
-                        string redirectUrl = requestedUrl == "login1.aspx"
-                            ? "https://localhost:44396/login1.aspx"
-                            : "https://localhost:44343/login2.aspx";
 
-                        redirectUrl += $"?token={HttpUtility.UrlEncode(token)}";
+                        // 從請求(request)中訪問returnUrlCookie
+                        var returnUrlCookie = context.Request.Cookies["ReturnUrlCookie"].ToString();
+                        if (returnUrlCookie != null && !string.IsNullOrEmpty(returnUrlCookie))
+                        {
+                            string returnUrl = returnUrlCookie;
+                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
 
-                        context.Response.Redirect(redirectUrl);
+                            context.Response.Redirect(redirectUrl);
+                        }
 
                         return Task.FromResult(0);
                     }
