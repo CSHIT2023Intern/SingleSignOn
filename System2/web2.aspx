@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="web2.aspx.cs" Inherits="SSO.web2" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="web2.aspx.cs" Inherits="SingleSignOn.web2" %>
 
 <!DOCTYPE html>
 

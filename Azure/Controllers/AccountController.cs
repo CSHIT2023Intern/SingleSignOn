@@ -34,7 +34,7 @@ namespace Azure.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                // 如果使用者已驗證，則重新導向至首頁。
+                // 若使用者通過驗證，即將其重新導向至首頁。
                 return RedirectToAction("Index", "Home");
             }
 

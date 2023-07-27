@@ -1,61 +1,66 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin;
-using Owin;
+using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
 using System.Threading.Tasks;
-using Microsoft.Owin.Security;
-using System.Security.Claims;
+using System.Web;
+using static SingleSignOn.Login;
 
-[assembly: OwinStartup(typeof(SSO.Startup))]
+[assembly: OwinStartup(typeof(Azure.Startup))]
 
-namespace SSO
+namespace Azure
 {
-    public class Startup
+    public partial class Startup
     {
-        private static readonly string clientId = "8ac293ab-6917-4723-a148-ea7a57832f27";
-        private static readonly string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74";
-        private static readonly string redirectUri = "https://localhost:44303/Login.aspx"; // 登入後重導向的URL
-
         public void Configuration(IAppBuilder app)
         {
-            // 設定Cookie驗證
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AuthenticationType = "ApplicationCookie", // 設定驗證類型
-                LoginPath = new PathString("/Login.aspx"), // 未驗證時導向的頁面
-                CookieName = "AuthCookie", // Set your authentication cookie name
-                ExpireTimeSpan = TimeSpan.FromMinutes(30), // Set your desired expiration time
-            });
+            // 配置身分驗證中間件
+            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+            app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
-            // 設定OpenID Connect驗證
+            string clientId = "8ac293ab-6917-4723-a148-ea7a57832f27";
+            string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租戶 ID
+
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 ClientId = clientId,
                 Authority = authority,
-                RedirectUri = redirectUri,
-                ResponseType = "id_token", // 僅驗證ID Token
-                Scope = "openid", // 要求驗證OpenID
-                SignInAsAuthenticationType = "Cookies",
-
+                ResponseType = OpenIdConnectResponseType.IdToken,
+                // RedirectUri = "https://localhost:44396/web1.aspx", // 設定為 MVC 應用程式的 returnUrl
+                PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的 returnUrl
+                TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證Issuer
+                },
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
-                    SecurityTokenValidated = n =>
+                    AuthenticationFailed = txt =>
                     {
-                        // 獲取 id_token 的值
-                        string idToken = n.ProtocolMessage.IdToken;
+                        // 處理驗證失敗的情況
+                        return Task.FromResult(0);
+                    },
+                    SecurityTokenValidated = txt =>
+                    {
+                        // 處理驗證成功的情況，如果需要，可以在這裡同步資料庫的用戶信息
+                        // 獲取使用者帳號名稱
+                        string account = txt.AuthenticationTicket.Identity.Name;
+                        TokenManager tokenManager = new TokenManager();
+                        bool isAzureADLogin = true; // 登入方式為Azure AD，將此設為true
+                        string token = tokenManager.GenerateToken(account, isAzureADLogin);
+                        tokenManager.StoreToken(token);
 
-                        // 儲存 id_token 到 Cookie 中
-                        var authenticationManager = n.OwinContext.Authentication;
-                        authenticationManager.SignIn(new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                        }, new ClaimsIdentity(new[] { new Claim("id_token", idToken) }));
+                        // 取消Owin Middleware的預設行為
+                        txt.HandleResponse();
 
-                        return Task.CompletedTask;
+                        string redirectUrl = "https://localhost:44396/web1.aspx?token=" + HttpUtility.UrlEncode(token);
+                        txt.Response.Redirect(redirectUrl);
+                        return Task.FromResult(0);
                     }
                 }
             });
+            ConfigureAuth(app);
         }
     }
 }

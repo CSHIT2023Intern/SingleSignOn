@@ -1,6 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="index2.aspx.cs" Inherits="SSO.index2" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="index2.aspx.cs" Inherits="SingleSignOn.index2" %>
 
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -19,7 +19,6 @@
 
     <form id="form1" runat="server">
         <div style="background-color: #47B7DD; width: 100%; height: 7%; margin-left: 0px; text-align: center;">
-            <asp:Image ID="logoImage" runat="server" ImageUrl="../imgs/csmulogo.jpg" Style="float: left;" />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <asp:Label ID="title2" runat="server" Text="選 課 系 統"></asp:Label>
 

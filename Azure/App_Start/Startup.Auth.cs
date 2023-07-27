@@ -14,7 +14,7 @@ namespace Azure
     public partial class Startup
     {
         private static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
-        private static string aadInstance = EnsureTrailingSlash(ConfigurationManager.AppSettings["ida:AADInstance"]);
+        private static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string tenantId = ConfigurationManager.AppSettings["ida:TenantId"];
         private static string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
         private static string authority = aadInstance + tenantId;
@@ -32,21 +32,6 @@ namespace Azure
                     Authority = authority,
                     PostLogoutRedirectUri = postLogoutRedirectUri
                 });
-        }
-
-        private static string EnsureTrailingSlash(string value)
-        {
-            if (value == null)
-            {
-                value = string.Empty;
-            }
-
-            if (!value.EndsWith("/", StringComparison.Ordinal))
-            {
-                return value + "/";
-            }
-
-            return value;
         }
     }
 }

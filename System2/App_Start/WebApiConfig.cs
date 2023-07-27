@@ -9,6 +9,9 @@ namespace System2
     {
         public static void Register(HttpConfiguration config)
         {
+            // 啟用跨網域存取
+            config.EnableCors();
+
             // Web API 設定和服務
 
             // Web API 路由

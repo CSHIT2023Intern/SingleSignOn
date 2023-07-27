@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// 組件的一般資訊會透過將設定 
+// 組件一般資訊會透過下列
 // 控制。變更這些屬性值可修改與組件關聯的
 // 資訊。
 [assembly: AssemblyTitle("Azure")]
@@ -16,16 +16,16 @@ using System.Runtime.InteropServices;
 
 // ComVisible 為 false 的方式來控制，讓此組件中的類型在 
 // COM 組件中為不可見。如果您需要從
-// COM 存取此組件中的型別，請在該型別上將 ComVisible 屬性設定為 true。
+// COM，將 ComVisible 屬性設定為該類型的 True。
 [assembly: ComVisible(false)]
 
 // 下列 GUID 為專案公開 (Expose) 至 COM 時所要使用的 typelib ID
-[assembly: Guid("027a08cb-cd27-45c2-a29b-65c9d5103ac4")]
+[assembly: Guid("cb0e821c-67ae-4400-9318-36a267c6bd73")]
 
 // 組件的版本資訊是由下列四項值構成:
 //
 //      主要版本
-//      次要版本存取此組件中的類型，
+//      次要版本控制，
 //      組建編號
 //      修訂編號
 //
