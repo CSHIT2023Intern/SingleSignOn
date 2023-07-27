@@ -7,7 +7,6 @@ namespace SingleSignOn
 {
     public partial class web1 : System.Web.UI.Page
     {
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -22,10 +21,8 @@ namespace SingleSignOn
 
                     if (isValidToken == true)
                     {
-                        // 記錄用戶已經在其他系統登入過，以便其他子站使用
                         Session["LoggedIn"] = true;
 
-                        // 儲存使用者帳號名稱
                         Session["user"] = account;
 
                         Response.Redirect("index1.aspx");

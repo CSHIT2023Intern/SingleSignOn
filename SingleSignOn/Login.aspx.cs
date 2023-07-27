@@ -18,7 +18,6 @@ namespace SingleSignOn
                 string returnUrl = Request.QueryString["returnUrl"];
                 if (!string.IsNullOrEmpty(returnUrl))
                 {
-                    // 將returnUrl存儲在Session中
                     Session["ReturnUrl"] = returnUrl;
                 }
             }
@@ -31,28 +30,32 @@ namespace SingleSignOn
 
             if (AuthenticateUser(account, password))
             {
-                // 設定登入狀態為已登入
                 Session["LoggedIn"] = true;
+
+                string returnUrl = Request.QueryString["returnUrl"];
 
                 TokenManager tokenManager = new TokenManager();
 
-                bool isAzureADLogin = false; // 登入方式為直接使用使用者名稱和密碼，將此設為false
+                bool isAzureADLogin = false;
                 string token = tokenManager.GenerateToken(account, isAzureADLogin);
 
                 tokenManager.StoreToken(token);
 
-                string returnUrl = Session["ReturnUrl"].ToString();
-                if (Session["ReturnUrl"] != null)
-                {
-                    Session.Remove("ReturnUrl");// 移除ReturnUrl變數，因為已經使用過了
+                HttpCookie tokenCookie = new HttpCookie("AuthToken", token);
+                Response.Cookies.Add(tokenCookie);
 
-                    // 將 Token 作為 QueryString 參數附加到重導向的 URL 中
+                //string returnUrl = Session["ReturnUrl"].ToString();
+                //if (Session["ReturnUrl"] != null)
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    Session.Remove("ReturnUrl");
+
                     string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
                     Response.Redirect(redirectUrl);
                 }
                 else
                 {
-                    Response.Redirect(returnUrl);
+                    Response.Redirect("Index.aspx?token=" + HttpUtility.UrlEncode(token));
                 }
             }
             else if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(password))
@@ -67,11 +70,8 @@ namespace SingleSignOn
 
         protected void ADButton_Click(object sender, EventArgs e)
         {
-            // ASP.NET Web 應用程式 (.NET Framework 4.7.2) - MVC
             Response.Redirect("https://localhost:44342/");
         }
-
-
 
 
 
@@ -101,7 +101,7 @@ namespace SingleSignOn
                         string token = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
 
                         // 將使用者帳號和Token加入字典中
-                        activeUserTokens[userAcc] = token;
+                        activeUserTokens[account] = token;
 
                         return token;
                     }
@@ -117,33 +117,32 @@ namespace SingleSignOn
                     Domain = "localhost" // 設定為主域名
                 };
 
-                // 將 Cookie 添加到 Response 中
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
             }
 
             /*
-            public bool ValidateToken(HttpRequestBase request, string token, out string userAcc)
+            public bool ValidateToken(HttpRequestBase request, string token, out string account)
             {
                 HttpCookie tokenCookie = request.Cookies[TokenCookieName];
                 if (tokenCookie != null && !string.IsNullOrEmpty(tokenCookie.Value))
                 {
                     string storedToken = tokenCookie.Value;
 
-                    // 解析 Token，取得 userAcc
+                    // 解析 Token，取得 account
                     string[] tokenData = storedToken.Split('_');
                     if (tokenData.Length == 3)
                     {
-                        userAcc = tokenData[0];
+                        account = tokenData[0];
 
                         // 驗證 Token 是否有效並和使用者帳號匹配
-                        if (token == storedToken && activeUserTokens.ContainsKey(userAcc) && activeUserTokens[userAcc] == token)
+                        if (token == storedToken && activeUserTokens.ContainsKey(account) && activeUserTokens[account] == token)
                         {
                             return true;
                         }
                     }
                 }
 
-                userAcc = null;
+                account = null;
                 return false;
             }*/
 

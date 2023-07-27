@@ -14,17 +14,16 @@ namespace SingleSignOn
             {
                 if (Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
-                    welcomeLabel.Text = "Welcome to System1！";
-                    logoutbtn.Visible = true;
+                    welcomeLabel.Text = "Welcome to System 1!";
                 }
                 else
                 {
-                    Response.Redirect("login1.aspx");
+                    Response.Redirect("web1.aspx");
                 }
             }
             else
             {
-                Response.Redirect("login1.aspx");
+                Response.Redirect("web1.aspx");
             }
         }
 
@@ -64,11 +63,11 @@ namespace SingleSignOn
                     if (isAzureADLogin)
                     {
                         // 取得 Azure AD 登出 URL
-                        string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定你的 Azure AD 中的租戶 ID
-                        string redirectUri = "https://localhost:44396/web1.aspx"; // 設定為登出後的回調 URL
+                        string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租戶 ID
+                        string redirectUri = "https://localhost:44345/Logout.aspx"; // 設定為登出後的回調 URL
                         string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
 
-                        Session["LoggedIn"] = false; // 清除使用者登入狀態
+                        Session["LoggedIn"] = false;
 
                         Response.Redirect(logoutUrl);
                     }
@@ -81,40 +80,5 @@ namespace SingleSignOn
                 }
             }
         }
-
-        /*
-        protected void Page_Load(object sender, EventArgs e)
-        { 
-            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
-            {
-                if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                {
-                    title.Text = "Welcome to System1！";
-                    btnLogout.Visible = true;
-                }
-                else
-                {
-                    Response.Redirect("login1.aspx");
-                }
-            }
-            else
-            {
-                Response.Redirect("login1.aspx");
-            }
-        }
-
-        protected void Btn_Logout_Click(object sender, EventArgs e)
-        {
-            TokenManager.CentralizedLogout();
-
-            // 取得 Azure AD 登出 URL
-            string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定你的 Azure AD 中的租戶 ID
-            string redirectUri = "https://localhost:44396/web1.aspx"; // 設定為登出後的回調 URL
-            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
-
-            Session["LoggedIn"] = false; // 清除使用者登入狀態
-
-            Response.Redirect(logoutUrl);
-        }*/
     }
 }

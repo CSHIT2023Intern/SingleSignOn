@@ -21,7 +21,7 @@ namespace Azure
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
             string clientId = "8ac293ab-6917-4723-a148-ea7a57832f27";
-            string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租戶 ID
+            string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租用戶 ID
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
@@ -29,10 +29,10 @@ namespace Azure
                 Authority = authority,
                 ResponseType = OpenIdConnectResponseType.IdToken,
                 // RedirectUri = "https://localhost:44396/web1.aspx", // 設定為 MVC 應用程式的 returnUrl
-                PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的 returnUrl
+                PostLogoutRedirectUri = "https://localhost:44345/Logout.aspx", // 設定為登出後的 returnUrl
                 TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
-                    ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證Issuer
+                    ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證 Issuer
                 },
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
@@ -43,18 +43,17 @@ namespace Azure
                     },
                     SecurityTokenValidated = txt =>
                     {
-                        // 處理驗證成功的情況，如果需要，可以在這裡同步資料庫的用戶信息
-                        // 獲取使用者帳號名稱
+                        // 處理驗證成功的情況
                         string account = txt.AuthenticationTicket.Identity.Name;
                         TokenManager tokenManager = new TokenManager();
-                        bool isAzureADLogin = true; // 登入方式為Azure AD，將此設為true
+                        bool isAzureADLogin = true;
                         string token = tokenManager.GenerateToken(account, isAzureADLogin);
                         tokenManager.StoreToken(token);
 
-                        // 取消Owin Middleware的預設行為
+                        // 取消 Owin Middleware 的預設行為
                         txt.HandleResponse();
 
-                        string redirectUrl = "https://localhost:44396/web1.aspx?token=" + HttpUtility.UrlEncode(token);
+                        string redirectUrl = "https://localhost:44345/Index.aspx?token=" + HttpUtility.UrlEncode(token);
                         txt.Response.Redirect(redirectUrl);
                         return Task.FromResult(0);
                     }
