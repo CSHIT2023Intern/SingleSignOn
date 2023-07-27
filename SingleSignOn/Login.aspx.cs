@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Web;
-using System.Security.Cryptography;
 using System.Text;
 using System.Configuration;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace SingleSignOn
 {
@@ -30,12 +31,12 @@ namespace SingleSignOn
 
             if (AuthenticateUser(userAcc, userPwd))
             {
-                // 設定登入狀態為已登入
                 Session["LoggedIn"] = true;
 
                 TokenManager tokenManager = new TokenManager();
 
-                string token = tokenManager.GenerateToken(userAcc);
+                bool isAzureADLogin = false;
+                string token = tokenManager.GenerateToken(userAcc, isAzureADLogin);
 
                 tokenManager.StoreToken(token);
 
@@ -55,13 +56,6 @@ namespace SingleSignOn
             }
             else
             {
-                /*
-                string errorMessage = "帳號或密碼錯誤！";
-                string safeErrorMessage = Page.ClientScript.GetSafeJsString(errorMessage);
-                string script = $"<script>alert('{safeErrorMessage}');</script>";
-                ClientScript.RegisterStartupScript(this.GetType(), "LoginError", script);
-                */
-                
                 string errorMessage = "帳號或密碼錯誤！";
                 string script = $"<script>alert('{errorMessage}');</script>";
                 ClientScript.RegisterStartupScript(this.GetType(), "LoginError", script);
@@ -70,8 +64,16 @@ namespace SingleSignOn
 
         protected void Btn_AzureAD_Click(object sender, EventArgs e)
         {
-            // 使用ASP.NET Web應用程式(.NET Framework 4.7.2)的MVC架構建立的專案的URL進行跳轉
-            Response.Redirect("https://localhost:44342/");
+            string returnUrl = Session["ReturnUrl"].ToString();
+            if (Session["ReturnUrl"] != null)
+            {
+                // 跳轉至Azure AD
+                Response.Redirect("https://localhost:44342/?requestedUrl=" + returnUrl);
+            }
+            else
+            {
+                Response.Redirect("https://localhost:44342/");
+            }
         }
 
         private bool AuthenticateUser(string userAcc, string userPwd)
@@ -86,89 +88,60 @@ namespace SingleSignOn
             }
         }
 
+        // Token的產生、儲存、驗證
         public class TokenManager
         {
-            string secretKey = ConfigurationManager.AppSettings["SecretKey"];
-            //private static readonly string SecretKey = ConfigurationManager.AppSettings["SecretKey"];
             public static readonly string TokenCookieName = "CookieToken";
 
             // 靜態字典，用來追踪使用者帳號對應的Token
-            private static readonly Dictionary<string, string> activeUserTokens = new Dictionary<string, string>();
+            // private static readonly Dictionary<string, string> activeUserTokens = new Dictionary<string, string>();
 
-            public string GenerateToken(string userAcc)
+            public string GenerateToken(string userAcc, bool isAzureADLogin)
             {
-                string tokenData = $"{userAcc}_{Guid.NewGuid()}";
-                if (!string.IsNullOrEmpty(secretKey))
-                {
-                    using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
-                    {
-                        byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(tokenData));
-                        string token = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+                string tokenData = $"{userAcc}_{Guid.NewGuid()}_{isAzureADLogin}";
 
-                        // 將使用者帳號和Token加入字典中
-                        activeUserTokens[userAcc] = token;
+                // 將 token 資料加密
+                string encryptedToken = TokenHelper.EncryptToken(tokenData);
 
-                        return token;
-                    }
-                }
-                return tokenData;
+                // 儲存加密後的 token
+                // activeUserTokens[userAcc] = encryptedToken;
+
+                return encryptedToken;
             }
 
             public void StoreToken(string token)
             {
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName, $"{token}")
                 {
-                    Expires = DateTime.Now.AddMinutes(30), // 設置適當的過期時間
+                    Expires = DateTime.Now.AddMinutes(30),
                     Domain = "localhost" // 設定為主域名
                 };
-
-                // 將 Cookie 添加到 Response 中
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
             }
-            
-            /*
+
             public bool ValidateToken(HttpRequestBase request, string token, out string userAcc)
             {
                 HttpCookie tokenCookie = request.Cookies[TokenCookieName];
                 if (tokenCookie != null && !string.IsNullOrEmpty(tokenCookie.Value))
                 {
-                    string storedToken = tokenCookie.Value;
+                    // 解密 cookie 中的 token && 解析解密後的 token 資料
+                    string storedToken = TokenHelper.DecryptToken(tokenCookie.Value);
+                    string[] storeTokenData = storedToken.Split('_');
 
-                    // 解析 Token，取得 userAcc
-                    string[] tokenData = storedToken.Split('_');
-                    if (tokenData.Length == 2)
+                    // 解密 帶回來的 token && 解析解密後的 token 資料
+                    string returnToken = TokenHelper.DecryptToken(token);
+                    string[] returnTokenData = returnToken.Split('_');
+
+                    if (storeTokenData.Length == 3 && returnTokenData.Length == 3)
                     {
-                        userAcc = tokenData[0];
+                        userAcc = storeTokenData[0];
 
-                        // 驗證 Token 是否有效並和使用者帳號匹配
-                        if (token == storedToken && activeUserTokens.ContainsKey(userAcc) && activeUserTokens[userAcc] == token)
+                        // 驗證 cookie中的token 與 帶回來的token
+                        if (returnTokenData[1] == storeTokenData[1])
                         {
                             return true;
                         }
                     }
-                }
-
-                userAcc = null;
-                return false;
-            }*/
-
-            public bool ValidateToken(HttpRequestBase request, string token, out string userAcc)
-            {
-                HttpCookie tokenCookie = request.Cookies[TokenCookieName];
-                if (tokenCookie != null && !string.IsNullOrEmpty(tokenCookie.Value))
-                {
-                    string storedToken = tokenCookie.Value;
-                    userAcc = "";
-
-                    // 解析 Token，取得 userAcc
-                    string[] tokenData = storedToken.Split('_');
-                    if (tokenData.Length == 2)
-                    {
-                        userAcc = tokenData[0];
-                    }
-
-                    // 驗證 Token 是否有效
-                    return token == storedToken;
                 }
 
                 userAcc = null;
@@ -183,6 +156,58 @@ namespace SingleSignOn
                     Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
+            }
+        }
+
+        // 加解密Token
+        public class TokenHelper
+        {
+            private const string EncryptionKey = "123456789"; // 加密金鑰
+
+            public static string EncryptToken(string tokenData)
+            {
+                byte[] clearBytes = Encoding.UTF8.GetBytes(tokenData);
+                using (Aes encryptor = Aes.Create())
+                {
+                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] {
+                0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
+            });
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(clearBytes, 0, clearBytes.Length);
+                            cs.Close();
+                        }
+                        return Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+            }
+
+            public static string DecryptToken(string encryptedToken)
+            {
+                byte[] cipherBytes = Convert.FromBase64String(encryptedToken);
+                using (Aes encryptor = Aes.Create())
+                {
+                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] {
+                0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
+            });
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(cipherBytes, 0, cipherBytes.Length);
+                            cs.Close();
+                        }
+                        return Encoding.UTF8.GetString(ms.ToArray());
+                    }
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ using System.Configuration;
 using System.IdentityModel.Tokens;
 using static SingleSignOn.Login;
 using System.Web;
+using WebGrease.Css.Ast;
 
 [assembly: OwinStartup(typeof(Azure.Startup))]
 
@@ -25,14 +26,14 @@ namespace Azure
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
             string clientId = "08ab7252-c7f9-4828-86ad-683e28516815";
-            string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16"; // 設定你的 Azure AD 中的租戶 ID
+            string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 ClientId = clientId,
                 Authority = authority,
                 ResponseType = OpenIdConnectResponseType.IdToken,
-                RedirectUri = "https://localhost:44396/login1.aspx", // 設定為你的MVC應用程式的回調URL
+                // RedirectUri = "https://localhost:44396/login1.aspx", // 設定為你的MVC應用程式的回調URL
                 PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的回調URL
                 TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
@@ -53,18 +54,23 @@ namespace Azure
                         string userAcc = context.AuthenticationTicket.Identity.Name;
 
                         TokenManager tokenManager = new TokenManager();
-                        // 產生Token
-                        string token = tokenManager.GenerateToken(userAcc);
-                        // 將Token存儲在Cookie中
+
+                        bool isAzureADLogin = true;
+                        string token = tokenManager.GenerateToken(userAcc, isAzureADLogin);
+
                         tokenManager.StoreToken(token);
 
                         // 取消Owin Middleware的預設行為
                         context.HandleResponse();
+                        
+                        // 根據請求的頁面確定重定向URL
+                        string requestedUrl = context.Request.Query["requestedUrl"];
+                        string redirectUrl = requestedUrl == "login1.aspx"
+                            ? "https://localhost:44396/login1.aspx"
+                            : "https://localhost:44343/login2.aspx";
 
-                        // 構建重定向的URL，將Token作為QueryString參數附加
-                        string redirectUrl = "https://localhost:44396/login1.aspx?token=" + HttpUtility.UrlEncode(token);
+                        redirectUrl += $"?token={HttpUtility.UrlEncode(token)}";
 
-                        // 進行重定向
                         context.Response.Redirect(redirectUrl);
 
                         return Task.FromResult(0);
