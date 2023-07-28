@@ -68,6 +68,7 @@
                 <asp:Label ID="title" runat="server" Text="Single SignOn 首頁"></asp:Label>
                 
                 <form runat="server">
+                    <div class="tab"></div>
                     <asp:Button ID="Btn_System1" runat="server" Text="System1" OnClick="Btn_System1_Click" />
                     <div class="tab"></div>
                     <asp:Button ID="Btn_System2" runat="server" Text="System2" OnClick="Btn_System2_Click" />
