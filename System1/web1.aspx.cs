@@ -11,33 +11,36 @@ namespace SingleSignOn
         {
             if (!IsPostBack)
             {
-                if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                if (IsTokenValid(out string account))
                 {
-                    string token = Request.Cookies[TokenManager.TokenCookieName].Value;
-
-                    TokenManager tokenManager = new TokenManager();
-
-                    bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
-
-                    if (isValidToken == true)
-                    {
-                        Session["LoggedIn"] = true;
-
-                        Session["user"] = account;
-
-                        Response.Redirect("index1.aspx");
-                    }
-                    else
-                    {
-                        Response.Redirect("https://localhost:44345/Login.aspx");
-                    }
+                    Session["LoggedIn"] = true;
+                    Session["user"] = account;
+                    Response.Redirect("index1.aspx");
                 }
                 else
                 {
-                    string returnUrl = Server.UrlEncode(Request.Url.ToString());
-                    Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
+                    RedirectToLogin();
                 }
             }
+        }
+
+        private bool IsTokenValid(out string account)
+        {
+            account = null;
+            HttpCookie tokenCookie = Request.Cookies[TokenManager.TokenCookieName];
+            if (tokenCookie != null)
+            {
+                string token = tokenCookie.Value;
+                TokenManager tokenManager = new TokenManager();
+                return tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out account);
+            }
+            return false;
+        }
+
+        private void RedirectToLogin()
+        {
+            string returnUrl = Server.UrlEncode(Request.Url.ToString());
+            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
         }
     }
 }

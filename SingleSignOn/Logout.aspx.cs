@@ -16,35 +16,29 @@ namespace SingleSignOn
 
         public void LogoutUser()
         {
-            string redirectUrl = Request.QueryString["returnUrl"];
-
             Session.Clear();
             Session.Abandon();
-            // Response.Cookies["Token"].Expires = DateTime.Now.AddDays(-1);
 
-            // 清除 AuthToken Cookie
             if (Request.Cookies["AuthToken"] != null)
             {
-                HttpCookie authTokenCookie = new HttpCookie("AuthToken");
-                authTokenCookie.Expires = DateTime.Now.AddDays(-1);
+                HttpCookie authTokenCookie = new HttpCookie("AuthToken")
+                {
+                    Expires = DateTime.Now.AddDays(-1)
+                };
                 Response.Cookies.Add(authTokenCookie);
             }
-            
-            HttpCookie cookie = Request.Cookies["Token"];
-            if (cookie != null)
+
+            if (Request.Cookies["Token"] != null)
             {
-                cookie.Expires = DateTime.Now.AddDays(-1);
-                Response.Cookies.Add(cookie);
+                HttpCookie tokenCookie = new HttpCookie("Token")
+                {
+                    Expires = DateTime.Now.AddDays(-1)
+                };
+                Response.Cookies.Add(tokenCookie);
             }
 
-            if (!string.IsNullOrEmpty(redirectUrl))
-            {
-                Response.Redirect(redirectUrl);
-            }
-            else
-            {
-                Response.Redirect("Login.aspx");
-            }
+            string redirectUrl = Request.QueryString["returnUrl"];
+            Response.Redirect(string.IsNullOrEmpty(redirectUrl) ? "Login.aspx" : redirectUrl);
         }
     }
 }

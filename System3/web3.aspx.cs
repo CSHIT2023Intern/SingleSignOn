@@ -10,35 +10,36 @@ namespace SingleSignOn
         {
             if (!IsPostBack)
             {
-                if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                if (IsTokenValid(out string account))
                 {
-                    string token = Request.Cookies[TokenManager.TokenCookieName].Value;
-
-                    TokenManager tokenManager = new TokenManager();
-
-                    bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
-
-                    if (isValidToken == true)
-                    {
-                        // 記錄用戶已經在其他系統登入過，以便其他子站使用
-                        Session["LoggedIn"] = true;
-
-                        // 儲存使用者帳號名稱
-                        Session["user"] = account;
-
-                        Response.Redirect("index3.aspx");
-                    }
-                    else
-                    {
-                        Response.Redirect("https://localhost:44345/Login.aspx");
-                    }
+                    Session["LoggedIn"] = true;
+                    Session["user"] = account;
+                    Response.Redirect("index3.aspx");
                 }
                 else
                 {
-                    string returnUrl = Server.UrlEncode(Request.Url.ToString());
-                    Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
+                    RedirectToLogin();
                 }
             }
+        }
+
+        private bool IsTokenValid(out string account)
+        {
+            account = null;
+            HttpCookie tokenCookie = Request.Cookies[TokenManager.TokenCookieName];
+            if (tokenCookie != null)
+            {
+                string token = tokenCookie.Value;
+                TokenManager tokenManager = new TokenManager();
+                return tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out account);
+            }
+            return false;
+        }
+
+        private void RedirectToLogin()
+        {
+            string returnUrl = Server.UrlEncode(Request.Url.ToString());
+            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
         }
     }
 }

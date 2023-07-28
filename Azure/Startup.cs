@@ -16,7 +16,6 @@ namespace Azure
     {
         public void Configuration(IAppBuilder app)
         {
-            // 配置身分驗證中間件
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
@@ -28,8 +27,8 @@ namespace Azure
                 ClientId = clientId,
                 Authority = authority,
                 ResponseType = OpenIdConnectResponseType.IdToken,
-                // RedirectUri = "https://localhost:44396/web1.aspx", // 設定為 MVC 應用程式的 returnUrl
-                PostLogoutRedirectUri = "https://localhost:44345/Logout.aspx", // 設定為登出後的 returnUrl
+                // RedirectUri = "https://localhost:44396/web1.aspx", // 設定為 MVC 應用程式的 redirectUrl
+                //PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的 redirectUrl
                 TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證 Issuer
@@ -53,8 +52,16 @@ namespace Azure
                         // 取消 Owin Middleware 的預設行為
                         txt.HandleResponse();
 
-                        string redirectUrl = "https://localhost:44345/Index.aspx?token=" + HttpUtility.UrlEncode(token);
-                        txt.Response.Redirect(redirectUrl);
+                        // 從請求(request)中訪問returnUrlCookie
+                        var returnUrlCookie = txt.Request.Cookies["ReturnUrlCookie"].ToString();
+                        if (returnUrlCookie != null && !string.IsNullOrEmpty(returnUrlCookie))
+                        {
+                            string returnUrl = returnUrlCookie;
+                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+
+                            txt.Response.Redirect(redirectUrl);
+                        }
+
                         return Task.FromResult(0);
                     }
                 }

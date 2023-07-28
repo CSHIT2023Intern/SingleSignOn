@@ -11,16 +11,41 @@ namespace SingleSignOn
 {
     public partial class Login : System.Web.UI.Page
     {
+        // 還要再修改
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                string returnUrl = Request.QueryString["returnUrl"];
-                if (!string.IsNullOrEmpty(returnUrl))
+                if (IsUserLoggedIn())
                 {
-                    Session["ReturnUrl"] = returnUrl;
+                    string account = accountTextBox.Text; // Use a default or previously used account
+                    TokenManager tokenManager = new TokenManager();
+
+                    bool isAzureADLogin = false;
+                    string token = tokenManager.GenerateToken(account, isAzureADLogin);
+
+                    tokenManager.StoreToken(token);
+
+                    HttpCookie tokenCookie = new HttpCookie("AuthToken", token);
+                    Response.Cookies.Add(tokenCookie);
+
+                    string returnUrl = Request.QueryString["returnUrl"];
+                    if (!string.IsNullOrEmpty(returnUrl))
+                    {
+                        string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                        Response.Redirect(redirectUrl);
+                    }
+                    else
+                    {
+                        Response.Redirect("Index.aspx?token=" + HttpUtility.UrlEncode(token));
+                    }
                 }
             }
+        }
+
+        private bool IsUserLoggedIn()
+        {
+            return Session["LoggedIn"] != null && (bool)Session["LoggedIn"];
         }
 
         protected void LoginButton_Click(object sender, EventArgs e)
@@ -70,7 +95,20 @@ namespace SingleSignOn
 
         protected void ADButton_Click(object sender, EventArgs e)
         {
-            Response.Redirect("https://localhost:44342/");
+            if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+            {
+                string returnUrl = Request.QueryString["returnUrl"];
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44342/");
+            }
+            else
+            {
+                string returnUrl = "https://localhost:44345/Index.aspx";
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44342/");
+            }
         }
 
 
@@ -92,20 +130,6 @@ namespace SingleSignOn
             public string GenerateToken(string account, bool isAzureADLogin)
             {
                 string tokenData = $"{account}_{Guid.NewGuid()}_{isAzureADLogin}";
-                /*
-                if (!string.IsNullOrEmpty(secretKey))
-                {
-                    using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
-                    {
-                        byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(tokenData));
-                        string token = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-
-                        // 將使用者帳號和Token加入字典中
-                        activeUserTokens[account] = token;
-
-                        return token;
-                    }
-                }*/
                 return tokenData;
             }
 
@@ -119,32 +143,6 @@ namespace SingleSignOn
 
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
             }
-
-            /*
-            public bool ValidateToken(HttpRequestBase request, string token, out string account)
-            {
-                HttpCookie tokenCookie = request.Cookies[TokenCookieName];
-                if (tokenCookie != null && !string.IsNullOrEmpty(tokenCookie.Value))
-                {
-                    string storedToken = tokenCookie.Value;
-
-                    // 解析 Token，取得 account
-                    string[] tokenData = storedToken.Split('_');
-                    if (tokenData.Length == 3)
-                    {
-                        account = tokenData[0];
-
-                        // 驗證 Token 是否有效並和使用者帳號匹配
-                        if (token == storedToken && activeUserTokens.ContainsKey(account) && activeUserTokens[account] == token)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                account = null;
-                return false;
-            }*/
 
             public bool ValidateToken(HttpRequestBase request, string token, out string account)
             {
