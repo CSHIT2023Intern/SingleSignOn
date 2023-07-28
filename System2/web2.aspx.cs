@@ -13,16 +13,11 @@ namespace SingleSignOn
                 if (Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
                     string token = Request.Cookies[TokenManager.TokenCookieName].Value;
-
                     TokenManager tokenManager = new TokenManager();
-
-                    bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
-
-                    if (isValidToken == true)
+                    if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
                     {
                         Session["LoggedIn"] = true;
                         Session["user"] = account;
-
                         Response.Redirect("index2.aspx");
                     }
                     else
@@ -32,8 +27,7 @@ namespace SingleSignOn
                 }
                 else
                 {
-                    string returnUrl = Server.UrlEncode(Request.Url.ToString());
-                    Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
+                    Response.Redirect($"https://localhost:44345/Login.aspx?returnUrl={Server.UrlEncode(Request.Url.ToString())}");
                 }
             }
         }

@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using System.IO;
 using System.Security.Cryptography;
 using System.Data.SqlTypes;
+using System.Web.UI;
 
 namespace SingleSignOn
 {
@@ -26,9 +27,7 @@ namespace SingleSignOn
 
                         TokenManager tokenManager = new TokenManager();
 
-                        bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
-
-                        if (isValidToken == true)
+                        if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
                         {
                             Session["LoggedIn"] = true;
                             Session["user"] = account;
@@ -42,23 +41,17 @@ namespace SingleSignOn
                 }
                 else
                 {
-                    if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
+                    if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"] && Request.Cookies[TokenManager.TokenCookieName] != null)
                     {
-                        if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                        {
-                            Response.Redirect("Index.aspx");
-                        }
+                        Response.Redirect("Index.aspx");
                     }
                 }
             }
             else
             {
-                if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
+                if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"] && Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
-                    if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                    {
-                        Response.Redirect("Index.aspx");
-                    }
+                    Response.Redirect("Index.aspx");
                 }
             }
         }
@@ -73,50 +66,41 @@ namespace SingleSignOn
                 Session["LoggedIn"] = true;
 
                 TokenManager tokenManager = new TokenManager();
-
                 bool isAzureADLogin = false;
                 string token = tokenManager.GenerateToken(account, isAzureADLogin);
-
                 tokenManager.StoreToken(token);
 
-                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
-                {
-                    string returnUrl = Request.QueryString["returnUrl"];
+                string returnUrl = !string.IsNullOrEmpty(Request.QueryString["returnUrl"])
+                    ? Request.QueryString["returnUrl"]
+                    : "https://localhost:44345/Index.aspx";
 
-                    string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
-                    Response.Redirect(redirectUrl);
-                }
-                else
-                {
-                    string returnUrl = "https://localhost:44345/Index.aspx";
-                    string redirectUrl = $"https://localhost:44345/Login.aspx?returnUrl={returnUrl}?token={HttpUtility.UrlEncode(token)}";
-                    Response.Redirect(redirectUrl);
-                }
+                string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                Response.Redirect(redirectUrl);
+
+            }
+            else if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(password))
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "showAlert", "alert('請輸入帳號及密碼！');", true);
             }
             else
             {
-                string errorMessage = "帳號或密碼錯誤！";
-                string script = $"<script>alert('{errorMessage}');</script>";
-                ClientScript.RegisterStartupScript(this.GetType(), "LoginError", script);
+                ScriptManager.RegisterStartupScript(this, GetType(), "showAlert", "alert('帳號及密碼填寫錯誤！');", true);
             }
         }
 
         protected void ADButton_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+            string returnUrl = !string.IsNullOrEmpty(Request.QueryString["returnUrl"])
+                ? Request.QueryString["returnUrl"]
+                : "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
+
+            HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl)
             {
-                string returnUrl = Request.QueryString["returnUrl"];
-                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
-                Response.Cookies.Add(returnUrlCookie);
-                Response.Redirect("https://localhost:44342/");
-            }
-            else
-            {
-                string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
-                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
-                Response.Cookies.Add(returnUrlCookie);
-                Response.Redirect("https://localhost:44342/");
-            }
+                Domain = "localhost"
+            };
+            Response.Cookies.Add(returnUrlCookie);
+
+            Response.Redirect("https://localhost:44342/");
         }
 
         private bool AuthenticateUser(string account, string password)
@@ -129,19 +113,10 @@ namespace SingleSignOn
         {
             public static readonly string TokenCookieName = "CookieToken";
 
-            // 靜態字典，用來追踪使用者帳號對應的Token
-            // private static readonly Dictionary<string, string> activeUserTokens = new Dictionary<string, string>();
-
-            public string GenerateToken(string userAcc, bool isAzureADLogin)
+            public string GenerateToken(string account, bool isAzureADLogin)
             {
-                string tokenData = $"{userAcc}_{Guid.NewGuid()}_{isAzureADLogin}";
-
-                // 將 token 資料加密
+                string tokenData = $"{account}_{Guid.NewGuid()}_{isAzureADLogin}";
                 string encryptedToken = TokenHelper.EncryptToken(tokenData);
-
-                // 儲存加密後的 token
-                // activeUserTokens[userAcc] = encryptedToken;
-
                 return encryptedToken;
             }
 
@@ -150,7 +125,7 @@ namespace SingleSignOn
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName, $"{token}")
                 {
                     Expires = DateTime.Now.AddMinutes(30),
-                    Domain = "localhost" // 設定為主域名
+                    Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
             }
@@ -179,7 +154,6 @@ namespace SingleSignOn
                         }
                     }
                 }
-
                 account = null;
                 return false;
             }

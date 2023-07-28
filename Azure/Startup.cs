@@ -55,19 +55,14 @@ namespace Azure
                         txt.HandleResponse();
 
                         // 從請求(request)中訪問returnUrlCookie
-                        if (txt.Request.Cookies["ReturnUrlCookie"] == null || string.IsNullOrEmpty(txt.Request.Cookies["ReturnUrlCookie"].ToString()))
+                        string returnUrl = txt.Request.Cookies["ReturnUrlCookie"]?.ToString();
+                        if (string.IsNullOrEmpty(returnUrl))
                         {
-                            string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
-                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
-                            txt.Response.Redirect(redirectUrl);
+                            returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
                         }
-                        else
-                        {
-                            string returnUrl = txt.Request.Cookies["ReturnUrlCookie"].ToString();
-                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
 
-                            txt.Response.Redirect(redirectUrl);
-                        }
+                        string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                        txt.Response.Redirect(redirectUrl);
 
                         return Task.FromResult(0);
                     }

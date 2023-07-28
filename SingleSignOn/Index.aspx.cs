@@ -12,21 +12,17 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
+            if (Session["LoggedIn"] == null || !(bool)Session["LoggedIn"])
             {
-                if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                {
-                    welcomeLabel.Text = "Welcome!";
-                    logoutbtn.Visible = true;
-                }
-                else
-                {
-                    Response.Redirect("Login.aspx");
-                }
+                Response.Redirect("Login.aspx");
+            }
+            else if (Request.Cookies[TokenManager.TokenCookieName] == null)
+            {
+                Response.Redirect("Login.aspx");
             }
             else
             {
-                Response.Redirect("Login.aspx");
+                welcomeLabel.Text = "Welcome!";
             }
         }
 
@@ -54,24 +50,14 @@ namespace SingleSignOn
                 string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
                 string[] tokenData = token.Split('_');
 
-                if (tokenData.Length == 3)
+                if (tokenData.Length == 3 && bool.TryParse(tokenData[2], out bool isAzureADLogin))
                 {
-                    bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
-                    if (isAzureADLogin)
-                    {
-                        string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
-                        string redirectUri = "https://localhost:44345/Login.aspx"; // 設定為登出後的回調 URL
-                        string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
+                    string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+                    string redirectUri = "https://localhost:44345/Login.aspx"; // 設定為登出後的回調 URL
+                    string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
 
-                        Session["LoggedIn"] = false;
-
-                        Response.Redirect(logoutUrl);
-                    }
-                    else
-                    {
-                        Session["LoggedIn"] = false;
-                        Response.Redirect("Login.aspx");
-                    }
+                    Session["LoggedIn"] = false;
+                    Response.Redirect(isAzureADLogin ? logoutUrl : "Login.aspx");
                 }
             }
         }
