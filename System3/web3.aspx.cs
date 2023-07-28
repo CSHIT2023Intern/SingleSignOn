@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 using static SingleSignOn.Login;
 
 namespace SingleSignOn
@@ -10,36 +14,32 @@ namespace SingleSignOn
         {
             if (!IsPostBack)
             {
-                if (IsTokenValid(out string account))
+                if (Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
-                    Session["LoggedIn"] = true;
-                    Session["user"] = account;
-                    Response.Redirect("index3.aspx");
+                    string token = Request.Cookies[TokenManager.TokenCookieName].Value;
+
+                    TokenManager tokenManager = new TokenManager();
+
+                    bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
+
+                    if (isValidToken == true)
+                    {
+                        Session["LoggedIn"] = true;
+                        Session["user"] = account;
+
+                        Response.Redirect("index3.aspx");
+                    }
+                    else
+                    {
+                        Response.Redirect("https://localhost:44345/Login.aspx");
+                    }
                 }
                 else
                 {
-                    RedirectToLogin();
+                    string returnUrl = Server.UrlEncode(Request.Url.ToString());
+                    Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
                 }
             }
-        }
-
-        private bool IsTokenValid(out string account)
-        {
-            account = null;
-            HttpCookie tokenCookie = Request.Cookies[TokenManager.TokenCookieName];
-            if (tokenCookie != null)
-            {
-                string token = tokenCookie.Value;
-                TokenManager tokenManager = new TokenManager();
-                return tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out account);
-            }
-            return false;
-        }
-
-        private void RedirectToLogin()
-        {
-            string returnUrl = Server.UrlEncode(Request.Url.ToString());
-            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
         }
     }
 }

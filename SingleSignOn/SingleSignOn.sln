@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System2", "..\System2\Syste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure", "..\Azure\Azure.csproj", "{2DDD0C8D-D5CB-40ED-9266-3EF8FC6A8B2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System3", "..\System3\System3.csproj", "{9181838C-0CBE-4F77-8E33-1104CF446716}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System3", "..\System3\System3.csproj", "{D97AD9EC-BEA8-48CD-828B-90412EF9C936}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{2DDD0C8D-D5CB-40ED-9266-3EF8FC6A8B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DDD0C8D-D5CB-40ED-9266-3EF8FC6A8B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DDD0C8D-D5CB-40ED-9266-3EF8FC6A8B2A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9181838C-0CBE-4F77-8E33-1104CF446716}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9181838C-0CBE-4F77-8E33-1104CF446716}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9181838C-0CBE-4F77-8E33-1104CF446716}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9181838C-0CBE-4F77-8E33-1104CF446716}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D97AD9EC-BEA8-48CD-828B-90412EF9C936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D97AD9EC-BEA8-48CD-828B-90412EF9C936}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D97AD9EC-BEA8-48CD-828B-90412EF9C936}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D97AD9EC-BEA8-48CD-828B-90412EF9C936}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

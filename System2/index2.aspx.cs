@@ -8,9 +8,17 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (IsLoggedInWithToken())
+            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
             {
-                welcomeLabel.Text = "Welcome to System 2!";
+                if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                {
+                    welcomeLabel.Text = "Welcome to System 2!";
+                    logoutbtn.Visible = true;
+                }
+                else
+                {
+                    Response.Redirect("web2.aspx");
+                }
             }
             else
             {
@@ -18,32 +26,27 @@ namespace SingleSignOn
             }
         }
 
-        private bool IsLoggedInWithToken()
-        {
-            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
-            {
-                return Request.Cookies[TokenManager.TokenCookieName] != null;
-            }
-            return false;
-        }
-
         protected void LogoutButton_Click(object sender, EventArgs e)
         {
             TokenManager.CentralizedLogout();
 
-            HttpCookie tokenCookie = Request.Cookies[TokenManager.TokenCookieName];
-            if (tokenCookie != null)
+            if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
-                string token = tokenCookie.Value;
+                string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
                 string[] tokenData = token.Split('_');
-                if (tokenData.Length == 3 && bool.TryParse(tokenData[2], out bool isAzureADLogin))
+
+                if (tokenData.Length == 3)
                 {
+                    //string userAcc = tokenData[0];
+                    bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
                     if (isAzureADLogin)
                     {
-                        string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租用戶 ID
-                        string redirectUri = "https://localhost:44345/Logout.aspx"; // 設定為登出後的 redirectUri
+                        string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+                        string redirectUri = "https://localhost:44343/web2.aspx"; // 設定為登出後的回調 URL
                         string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
-                        Session["LoggedIn"] = false;
+
+                        Session["LoggedIn"] = false; // 清除使用者登入狀態
+
                         Response.Redirect(logoutUrl);
                     }
                     else

@@ -4,8 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Security.Cryptography;
-using System.Text;
 using static SingleSignOn.Login;
 
 namespace SingleSignOn
@@ -14,19 +12,17 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Request.Cookies["AuthToken"] != null || Request.QueryString["token"] != null)
+            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
             {
-                //if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
-                //if (HttpContext.Current.User.Identity.IsAuthenticated)
-                //{
-                //if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                //{
-                welcomeLabel.Text = "Welcome!";
-                //}
-                //else
-                //{
-                //    Response.Redirect("Login.aspx");
-                //}
+                if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                {
+                    welcomeLabel.Text = "Welcome!";
+                    logoutbtn.Visible = true;
+                }
+                else
+                {
+                    Response.Redirect("Login.aspx");
+                }
             }
             else
             {
@@ -36,43 +32,45 @@ namespace SingleSignOn
 
         protected void Web1btn_Click(object sender, EventArgs e)
         {
-            Response.Redirect("https://localhost:44396/web1.aspx");
+            Response.Redirect("https://localhost:44396/index1.aspx");
         }
 
         protected void Web2btn_Click(object sender, EventArgs e)
         {
-            Response.Redirect("https://localhost:44343/web2.aspx");
+            Response.Redirect("https://localhost:44343/index2.aspx");
         }
 
         protected void Web3btn_Click(object sender, EventArgs e)
         {
-            Response.Redirect("https://localhost:44379/web3.aspx");
+            Response.Redirect("https://localhost:44391/index3.aspx");
         }
 
         protected void LogoutButton_Click(object sender, EventArgs e)
         {
             TokenManager.CentralizedLogout();
 
-            HttpCookie tokenCookie = Request.Cookies[TokenManager.TokenCookieName];
-            if (tokenCookie != null)
+            if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
-                string token = tokenCookie.Value;
+                string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
                 string[] tokenData = token.Split('_');
-                if (tokenData.Length == 3 && bool.TryParse(tokenData[2], out bool isAzureADLogin))
+
+                if (tokenData.Length == 3)
                 {
+                    bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
                     if (isAzureADLogin)
                     {
-                        // 取得 Azure AD 登出 URL
-                        string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租戶 ID
-                        string redirectUri = "https://localhost:44345/Logout.aspx"; // 設定為登出後的回調 URL
+                        string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+                        string redirectUri = "https://localhost:44345/Login.aspx"; // 設定為登出後的回調 URL
                         string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
+
                         Session["LoggedIn"] = false;
+
                         Response.Redirect(logoutUrl);
                     }
                     else
                     {
                         Session["LoggedIn"] = false;
-                        Response.Redirect("Logout.aspx");
+                        Response.Redirect("Login.aspx");
                     }
                 }
             }

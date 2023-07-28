@@ -1,14 +1,18 @@
-﻿using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
-using System.Threading.Tasks;
-using System.Web;
+using System.Configuration;
+using System.IdentityModel.Tokens;
 using static SingleSignOn.Login;
+using System.Web;
 
 [assembly: OwinStartup(typeof(Azure.Startup))]
+
 
 namespace Azure
 {
@@ -19,19 +23,17 @@ namespace Azure
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
-            string clientId = "8ac293ab-6917-4723-a148-ea7a57832f27";
-            string authority = "https://login.microsoftonline.com/9902d6cb-2777-42b8-8d31-31a3f6db7e74"; // 設定 Azure AD 中的租用戶 ID
+            string clientId = "98578604-4999-42f7-9a6a-e1a5bac209da";
+            string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 ClientId = clientId,
                 Authority = authority,
                 ResponseType = OpenIdConnectResponseType.IdToken,
-                // RedirectUri = "https://localhost:44396/web1.aspx", // 設定為 MVC 應用程式的 redirectUrl
-                //PostLogoutRedirectUri = "https://localhost:44345/Login.aspx", // 設定為登出後的 redirectUrl
                 TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
-                    ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證 Issuer
+                    ValidateIssuer = false // 在測試時，可能需要暫時禁用驗證Issuer
                 },
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
@@ -49,14 +51,19 @@ namespace Azure
                         string token = tokenManager.GenerateToken(account, isAzureADLogin);
                         tokenManager.StoreToken(token);
 
-                        // 取消 Owin Middleware 的預設行為
+                        // 取消Owin Middleware的預設行為
                         txt.HandleResponse();
 
                         // 從請求(request)中訪問returnUrlCookie
-                        var returnUrlCookie = txt.Request.Cookies["ReturnUrlCookie"].ToString();
-                        if (returnUrlCookie != null && !string.IsNullOrEmpty(returnUrlCookie))
+                        if (txt.Request.Cookies["ReturnUrlCookie"] == null || string.IsNullOrEmpty(txt.Request.Cookies["ReturnUrlCookie"].ToString()))
                         {
-                            string returnUrl = returnUrlCookie;
+                            string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
+                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                            txt.Response.Redirect(redirectUrl);
+                        }
+                        else
+                        {
+                            string returnUrl = txt.Request.Cookies["ReturnUrlCookie"].ToString();
                             string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
 
                             txt.Response.Redirect(redirectUrl);
@@ -66,7 +73,6 @@ namespace Azure
                     }
                 }
             });
-            ConfigureAuth(app);
         }
     }
 }
