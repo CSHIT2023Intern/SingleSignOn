@@ -10,7 +10,6 @@ using System.Configuration;
 using System.IdentityModel.Tokens;
 using static SingleSignOn.Login;
 using System.Web;
-using WebGrease.Css.Ast;
 
 [assembly: OwinStartup(typeof(Azure.Startup))]
 
@@ -46,7 +45,7 @@ namespace Azure
                     },
                     SecurityTokenValidated = context =>
                     {
-                        // 處理驗證成功的情況，如果需要，可以在這裡同步資料庫的用戶信息
+                        // 處理驗證成功的情況
 
                         string userAcc = context.AuthenticationTicket.Identity.Name;
 
@@ -61,10 +60,15 @@ namespace Azure
                         context.HandleResponse();
 
                         // 從請求(request)中訪問returnUrlCookie
-                        var returnUrlCookie = context.Request.Cookies["ReturnUrlCookie"].ToString();
-                        if (returnUrlCookie != null && !string.IsNullOrEmpty(returnUrlCookie))
+                        if (context.Request.Cookies["ReturnUrlCookie"] == null || string.IsNullOrEmpty(context.Request.Cookies["ReturnUrlCookie"].ToString()))
                         {
-                            string returnUrl = returnUrlCookie;
+                            string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Frontpage.aspx";
+                            string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                            context.Response.Redirect(redirectUrl);
+                        }
+                        else
+                        {
+                            string returnUrl = context.Request.Cookies["ReturnUrlCookie"].ToString();
                             string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
 
                             context.Response.Redirect(redirectUrl);

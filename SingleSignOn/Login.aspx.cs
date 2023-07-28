@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Web;
 using System.Text;
-using System.Configuration;
-using System.Collections.Generic;
-using Microsoft.Identity.Client;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -13,19 +10,39 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
+            if (Request.Cookies[TokenManager.TokenCookieName] == null)
             {
-                string returnUrl = Request.QueryString["returnUrl"];
-                if (!string.IsNullOrEmpty(returnUrl))
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                { }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                 {
-                    // 將returnUrl存儲在Session中
-                    Session["ReturnUrl"] = returnUrl;
+                    string returnUrl = Request.QueryString["returnUrl"];
 
                     if (Request.Cookies[TokenManager.TokenCookieName] != null)
                     {
-                        Response.Redirect(returnUrl);
+                        string token = Request.Cookies[TokenManager.TokenCookieName].Value;
+
+                        TokenManager tokenManager = new TokenManager();
+
+                        bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string userAcc);
+
+                        if (isValidToken == true)
+                        {
+                            // 儲存使用者帳號名稱
+                            Session["user"] = userAcc;
+
+                            Response.Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
+                        }
                     }
                 }
+                Response.Redirect("Frontpage.aspx");
             }
         }
 
@@ -36,8 +53,6 @@ namespace SingleSignOn
 
             if (AuthenticateUser(userAcc, userPwd))
             {
-                Session["LoggedIn"] = true;
-
                 TokenManager tokenManager = new TokenManager();
 
                 bool isAzureADLogin = false;
@@ -45,18 +60,17 @@ namespace SingleSignOn
 
                 tokenManager.StoreToken(token);
 
-                string returnUrl = Session["ReturnUrl"].ToString();
-                if (Session["ReturnUrl"] != null)
+                if (Request.QueryString["returnUrl"] != null)
                 {
-                    Session.Remove("ReturnUrl");// 移除ReturnUrl變數，因為已經使用過了
-
-                    // 將 Token 作為 QueryString 參數附加到重導向的 URL 中
+                    string returnUrl = Request.QueryString["returnUrl"];
                     string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
                     Response.Redirect(redirectUrl);
                 }
                 else
                 {
-                    Response.Redirect(returnUrl);
+                    string returnUrl = "https://localhost:44345/Frontpage.aspx";
+                    string redirectUrl = $"https://localhost:44345/Login.aspx?returnUrl={returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                    Response.Redirect(redirectUrl);
                 }
             }
             else
@@ -69,11 +83,20 @@ namespace SingleSignOn
 
         protected void Btn_AzureAD_Click(object sender, EventArgs e)
         {
-            string returnUrl = Request.QueryString["returnUrl"];
-            // 將 returnUrl 存儲於 cookie 中
-            HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
-            Response.Cookies.Add(returnUrlCookie);
-            Response.Redirect("https://localhost:44342/");
+            if (Request.QueryString["returnUrl"] != null)
+            {
+                string returnUrl = Request.QueryString["returnUrl"];
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44342/");
+            }
+            else
+            {
+                string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Frontpage.aspx";
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44342/");
+            }
         }
 
         private bool AuthenticateUser(string userAcc, string userPwd)

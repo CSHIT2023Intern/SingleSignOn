@@ -1,6 +1,4 @@
-﻿using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.OpenIdConnect;
-using System;
+﻿using System;
 using System.Web;
 using static SingleSignOn.Login;
 
@@ -10,21 +8,22 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"])
+            if (Request.Cookies[TokenManager.TokenCookieName] == null)
             {
-                if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                 {
-                    title.Text = "Welcome to System1！";
-                    Btn_Logout.Visible = true;
+                    string loginUrl = Request.QueryString["returnUrl"];
+                    Response.Redirect(loginUrl);
                 }
-                else
-                {
-                    Response.Redirect("login1.aspx");
-                }
+                Response.Redirect("login1.aspx");
             }
             else
             {
-                Response.Redirect("login1.aspx");
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                {
+                    title.Text = "Welcome to System1!";
+                }
+                title.Text = "Welcome to System1!";
             }
         }
 
@@ -40,22 +39,36 @@ namespace SingleSignOn
                 if (tokenData.Length == 3)
                 {
                     bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
+
                     if (isAzureADLogin)
                     {
                         // 取得 Azure AD 登出 URL
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
-                        string redirectUri = "https://localhost:44396/login1.aspx"; // 設定為登出後的回調 URL
-                        string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
 
-                        Session["LoggedIn"] = false; // 清除使用者登入狀態
-
-                        Response.Redirect(logoutUrl);
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            Response.Redirect(logoutUrl);
+                        }
+                        else
+                        {
+                            string returnUrl = "https://localhost:44396/login1.aspx";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            Response.Redirect(logoutUrl);
+                        }
                     }
                     else
                     {
-                        // 本地帳號/密碼 登出
-                        Session["LoggedIn"] = false;
-                        Response.Redirect("login1.aspx");
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            Response.Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            Response.Redirect("login1.aspx");
+                        }
                     }
                 }  
             }
