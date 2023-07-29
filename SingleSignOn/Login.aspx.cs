@@ -15,7 +15,12 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
+            if (Request.Cookies[TokenManager.TokenCookieName] == null)
+            {
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                { }
+            }
+            else
             {
                 if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                 {
@@ -27,10 +32,12 @@ namespace SingleSignOn
 
                         TokenManager tokenManager = new TokenManager();
 
-                        if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
+                        bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
+
+                        if (isValidToken == true)
                         {
-                            Session["LoggedIn"] = true;
                             Session["user"] = account;
+
                             Response.Redirect(returnUrl);
                         }
                         else
@@ -39,20 +46,7 @@ namespace SingleSignOn
                         }
                     }
                 }
-                else
-                {
-                    if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"] && Request.Cookies[TokenManager.TokenCookieName] != null)
-                    {
-                        Response.Redirect("Index.aspx");
-                    }
-                }
-            }
-            else
-            {
-                if (Session["LoggedIn"] != null && (bool)Session["LoggedIn"] && Request.Cookies[TokenManager.TokenCookieName] != null)
-                {
-                    Response.Redirect("Index.aspx");
-                }
+                Response.Redirect("Index.aspx");
             }
         }
 
@@ -63,20 +57,13 @@ namespace SingleSignOn
 
             if (AuthenticateUser(account, password))
             {
-                Session["LoggedIn"] = true;
-
                 TokenManager tokenManager = new TokenManager();
                 bool isAzureADLogin = false;
                 string token = tokenManager.GenerateToken(account, isAzureADLogin);
                 tokenManager.StoreToken(token);
 
-                string returnUrl = !string.IsNullOrEmpty(Request.QueryString["returnUrl"])
-                    ? Request.QueryString["returnUrl"]
-                    : "https://localhost:44345/Index.aspx";
-
-                string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
-                Response.Redirect(redirectUrl);
-
+                string returnUrl = Request.QueryString["returnUrl"] ?? "https://localhost:44345/Index.aspx";
+                Response.Redirect($"{returnUrl}?token={HttpUtility.UrlEncode(token)}");
             }
             else if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(password))
             {
@@ -90,16 +77,12 @@ namespace SingleSignOn
 
         protected void ADButton_Click(object sender, EventArgs e)
         {
-            string returnUrl = !string.IsNullOrEmpty(Request.QueryString["returnUrl"])
-                ? Request.QueryString["returnUrl"]
-                : "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
-
+            string returnUrl = Request.QueryString["returnUrl"] ?? "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
             HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl)
             {
                 Domain = "localhost"
             };
             Response.Cookies.Add(returnUrlCookie);
-
             Response.Redirect("https://localhost:44342/");
         }
 

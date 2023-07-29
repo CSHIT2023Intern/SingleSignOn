@@ -25,13 +25,13 @@
         </p>
         <br />
         <p>
-            <asp:Button ID="web1btn" runat="server" Text="web1" OnClick="Web1btn_Click" />
+            <asp:Button ID="web1btn" runat="server" Text="web1" OnClick="Web1btn_Click"/>
         </p>
         <p>
-            <asp:Button ID="web2btn" runat="server" Text="web2" OnClick="Web2btn_Click" />
+            <asp:Button ID="web2btn" runat="server" Text="web2" OnClick="Web2btn_Click"/>
         </p>
         <p>
-            <asp:Button ID="web3btn" runat="server" Text="web3" OnClick="Web3btn_Click" />
+            <asp:Button ID="web3btn" runat="server" Text="web3" OnClick="Web3btn_Click"/>
         </p>
         <br />
         <asp:Label ID="errorLabel" runat="server" Text="" Style="color:white;"></asp:Label>

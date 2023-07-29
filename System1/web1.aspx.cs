@@ -17,7 +17,6 @@ namespace SingleSignOn
                     TokenManager tokenManager = new TokenManager();
                     if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
                     {
-                        Session["LoggedIn"] = true;
                         Session["user"] = account;
                         Response.Redirect("index1.aspx");
                     }
@@ -28,7 +27,8 @@ namespace SingleSignOn
                 }
                 else
                 {
-                    Response.Redirect($"https://localhost:44345/Login.aspx?returnUrl={Server.UrlEncode(Request.Url.ToString())}");
+                    string returnUrl = Server.UrlEncode(Request.Url.ToString());
+                    Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
                 }
             }
         }
