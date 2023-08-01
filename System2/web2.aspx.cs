@@ -17,6 +17,11 @@ namespace SingleSignOn
                     if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
                     {
                         Session["user"] = account;
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            Response.Redirect("https://localhost:44343/index2.aspx?returnUrl=" + returnUrl);
+                        }
                         Response.Redirect("index2.aspx");
                     }
                     else

@@ -25,19 +25,19 @@ namespace SingleSignOn
         protected void Web1btn_Click(object sender, EventArgs e)
         {
             string returnUrl = "https://localhost:44345/Login.aspx";
-            Response.Redirect("https://localhost:44396/index1.aspx?returnUrl=" + returnUrl);
+            Response.Redirect("https://localhost:44396/web1.aspx?returnUrl=" + returnUrl);
         }
 
         protected void Web2btn_Click(object sender, EventArgs e)
         {
             string returnUrl = "https://localhost:44345/Login.aspx";
-            Response.Redirect("https://localhost:44343/index2.aspx?returnUrl=" + returnUrl);
+            Response.Redirect("https://localhost:44343/web2.aspx?returnUrl=" + returnUrl);
         }
 
         protected void Web3btn_Click(object sender, EventArgs e)
         {
             string returnUrl = "https://localhost:44345/Login.aspx";
-            Response.Redirect("https://localhost:44391/index3.aspx?returnUrl=" + returnUrl);
+            Response.Redirect("https://localhost:44391/web3.aspx?returnUrl=" + returnUrl);
         }
 
         protected void LogoutButton_Click(object sender, EventArgs e)

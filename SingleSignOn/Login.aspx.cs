@@ -26,25 +26,7 @@ namespace SingleSignOn
                 {
                     string returnUrl = Request.QueryString["returnUrl"];
 
-                    if (Request.Cookies[TokenManager.TokenCookieName] != null)
-                    {
-                        string token = Request.Cookies[TokenManager.TokenCookieName].Value;
-
-                        TokenManager tokenManager = new TokenManager();
-
-                        bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
-
-                        if (isValidToken == true)
-                        {
-                            Session["user"] = account;
-
-                            Response.Redirect(returnUrl);
-                        }
-                        else
-                        {
-                            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
-                        }
-                    }
+                    Response.Redirect(returnUrl);
                 }
                 Response.Redirect("Index.aspx");
             }
@@ -143,7 +125,7 @@ namespace SingleSignOn
 
             public static void CentralizedLogout()
             {
-                // 清除儲存在cookie中的token
+                // 清除儲存在 cookie 中的 token
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName)
                 {
                     Expires = DateTime.Now.AddDays(-1),
@@ -151,7 +133,7 @@ namespace SingleSignOn
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
 
-                // 清除儲存在cookie中的returnUrl
+                // 清除儲存在 cookie 中的 returnUrl
                 HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie")
                 {
                     Expires = DateTime.Now.AddDays(-1),
@@ -161,7 +143,7 @@ namespace SingleSignOn
             }
         }
 
-        // 加解密Token
+        // 加解密 Token
         public class TokenHelper
         {
             private const string EncryptionKey = "123456789"; // 加密金鑰

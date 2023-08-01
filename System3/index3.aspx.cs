@@ -12,10 +12,7 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            string tokenCookieName = TokenManager.TokenCookieName;
-            HttpCookie tokenCookie = Request.Cookies[tokenCookieName];
-
-            if (tokenCookie == null)
+            if (Request.Cookies[TokenManager.TokenCookieName] == null)
             {
                 string returnUrl = Request.QueryString["returnUrl"];
                 Response.Redirect(string.IsNullOrEmpty(returnUrl) ? "web3.aspx" : returnUrl);
@@ -30,20 +27,45 @@ namespace SingleSignOn
         {
             TokenManager.CentralizedLogout();
 
-            string tokenCookieName = TokenManager.TokenCookieName;
-            HttpCookie tokenCookie = Request.Cookies[tokenCookieName];
-
-            if (tokenCookie != null)
+            if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
-                string token = TokenHelper.DecryptToken(tokenCookie.Value);
+                string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
                 string[] tokenData = token.Split('_');
 
-                if (tokenData.Length == 3 && bool.TryParse(tokenData[2], out bool isAzureADLogin))
+                if (tokenData.Length == 3)
                 {
-                    string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
-                    string returnUrl = Request.QueryString["returnUrl"] ?? "https://localhost:44391/web3.aspx";
-                    string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
-                    Response.Redirect(isAzureADLogin ? logoutUrl : returnUrl);
+                    bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
+
+                    if (isAzureADLogin)
+                    {
+                        // 取得 Azure AD 登出 URL
+                        string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            Response.Redirect(logoutUrl);
+                        }
+                        else
+                        {
+                            string returnUrl = "https://localhost:44343/web2.aspx";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            Response.Redirect(logoutUrl);
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            Response.Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            Response.Redirect("web2.aspx");
+                        }
+                    }
                 }
             }
         }
