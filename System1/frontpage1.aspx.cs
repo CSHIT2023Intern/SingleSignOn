@@ -15,6 +15,7 @@ namespace SingleSignOn
                     string loginUrl = Request.QueryString["returnUrl"];
                     Response.Redirect(loginUrl);
                 }
+
                 Response.Redirect("login1.aspx");
             }
             else
@@ -23,6 +24,7 @@ namespace SingleSignOn
                 {
                     title.Text = "Welcome to System1!";
                 }
+
                 title.Text = "Welcome to System1!";
             }
         }
@@ -42,7 +44,6 @@ namespace SingleSignOn
 
                     if (isAzureADLogin)
                     {
-                        // 取得 Azure AD 登出 URL
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
 
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
@@ -65,10 +66,8 @@ namespace SingleSignOn
                             string returnUrl = Request.QueryString["returnUrl"];
                             Response.Redirect(returnUrl);
                         }
-                        else
-                        {
-                            Response.Redirect("login1.aspx");
-                        }
+
+                        Response.Redirect("login1.aspx");
                     }
                 }  
             }

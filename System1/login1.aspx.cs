@@ -24,12 +24,16 @@ namespace SingleSignOn
                         // 儲存使用者帳號名稱
                         Session["user"] = userAcc;
 
+                        if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                        {
+                            string returnUrl = Request.QueryString["returnUrl"];
+                            Response.Redirect("https://localhost:44396/frontpage1.aspx?returnUrl=" + returnUrl);
+                        }
+
                         Response.Redirect("frontpage1.aspx");
                     }
-                    else
-                    {
-                        Response.Redirect("https://localhost:44345/Login.aspx");
-                    }
+
+                    Response.Redirect("https://localhost:44345/Login.aspx");
                 }
                 else
                 {

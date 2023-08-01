@@ -16,22 +16,20 @@ namespace SingleSignOn
             {
                 Response.Redirect("Login.aspx");
             }
-            else
-            {
-                title.Text = "Welcome to SingleSignOn!";
-            }
+
+            title.Text = "Welcome to SingleSignOn!";
         }
 
         protected void Btn_System1_Click(object sender, EventArgs e)
         {
             string returnUrl = "https://localhost:44345/Login.aspx";
-            Response.Redirect("https://localhost:44396/frontpage1.aspx?returnUrl=" + returnUrl);
+            Response.Redirect("https://localhost:44396/login1.aspx?returnUrl=" + returnUrl);
         }
 
         protected void Btn_System2_Click(object sender, EventArgs e)
         {
             string returnUrl = "https://localhost:44345/Login.aspx";
-            Response.Redirect("https://localhost:44343/frontpage2.aspx?returnUrl=" + returnUrl);
+            Response.Redirect("https://localhost:44343/login2.aspx?returnUrl=" + returnUrl);
         }
 
         protected void Btn_Logout_Click(object sender, EventArgs e)
@@ -48,7 +46,6 @@ namespace SingleSignOn
                     bool isAzureADLogin = Convert.ToBoolean(tokenData[2]);
                     if (isAzureADLogin)
                     {
-                        // 取得 Azure AD 登出 URL
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
                         string redirectUri = "https://localhost:44345/Login.aspx"; // 設定為登出後的回調 URL
                         string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";

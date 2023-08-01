@@ -59,7 +59,7 @@ namespace Azure
                         // 取消Owin Middleware的預設行為
                         context.HandleResponse();
 
-                        // 從請求(request)中訪問returnUrlCookie
+                        // 從request中訪問returnUrlCookie
                         if (context.Request.Cookies["ReturnUrlCookie"] == null || string.IsNullOrEmpty(context.Request.Cookies["ReturnUrlCookie"].ToString()))
                         {
                             string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Frontpage.aspx";
@@ -70,7 +70,6 @@ namespace Azure
                         {
                             string returnUrl = context.Request.Cookies["ReturnUrlCookie"].ToString();
                             string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
-
                             context.Response.Redirect(redirectUrl);
                         }
 

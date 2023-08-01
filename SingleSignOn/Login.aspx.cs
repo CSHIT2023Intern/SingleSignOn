@@ -23,25 +23,10 @@ namespace SingleSignOn
 
                     if (Request.Cookies[TokenManager.TokenCookieName] != null)
                     {
-                        string token = Request.Cookies[TokenManager.TokenCookieName].Value;
-
-                        TokenManager tokenManager = new TokenManager();
-
-                        bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string userAcc);
-
-                        if (isValidToken == true)
-                        {
-                            // 儲存使用者帳號名稱
-                            Session["user"] = userAcc;
-
-                            Response.Redirect(returnUrl);
-                        }
-                        else
-                        {
-                            Response.Redirect("https://localhost:44345/Login.aspx?returnUrl=" + returnUrl);
-                        }
+                        Response.Redirect(returnUrl);
                     }
                 }
+
                 Response.Redirect("Frontpage.aspx");
             }
         }
@@ -137,7 +122,7 @@ namespace SingleSignOn
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName, $"{token}")
                 {
                     Expires = DateTime.Now.AddMinutes(30),
-                    Domain = "localhost" // 設定為主域名
+                    Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
             }
@@ -159,14 +144,13 @@ namespace SingleSignOn
                     {
                         userAcc = storeTokenData[0];
 
-                        // 驗證 cookie中的token 與 帶回來的token
+                        // 驗證 cookie中的token 與 回傳的token
                         if (returnTokenData[1] == storeTokenData[1])
                         {
                             return true;
                         }
                     }
                 }
-
                 userAcc = null;
                 return false;
             }
