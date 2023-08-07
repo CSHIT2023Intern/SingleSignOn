@@ -16,8 +16,18 @@ namespace SingleSignOn
             {
                 Response.Redirect("Login.aspx");
             }
-
-            title.Text = "Welcome to SingleSignOn!";
+            else
+            {
+                if (Request.Cookies["UserInformation"] != null)
+                {
+                    string userFullName = Request.Cookies["UserInformation"]["FullName"];
+                    title.Text = userFullName + ", Welcome to SingleSignOn!";
+                }
+                else
+                {
+                    title.Text = "Welcome to SingleSignOn!";
+                }
+            }
         }
 
         protected void Btn_System1_Click(object sender, EventArgs e)

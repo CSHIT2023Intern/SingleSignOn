@@ -3,6 +3,7 @@ using System.Web;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using System.DirectoryServices;
 
 namespace SingleSignOn
 {
@@ -73,17 +74,18 @@ namespace SingleSignOn
                 string returnUrl = Request.QueryString["returnUrl"];
                 HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
                 Response.Cookies.Add(returnUrlCookie);
-                Response.Redirect("https://localhost:44342/");
+                Response.Redirect("https://localhost:44367/");
             }
             else
             {
                 string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Frontpage.aspx";
                 HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
                 Response.Cookies.Add(returnUrlCookie);
-                Response.Redirect("https://localhost:44342/");
+                Response.Redirect("https://localhost:44367/");
             }
         }
 
+        /*
         private bool AuthenticateUser(string userAcc, string userPwd)
         {
             if (userAcc == "user" && userPwd == "0000")
@@ -92,6 +94,37 @@ namespace SingleSignOn
             }
             else
             {
+                return false;
+            }
+        }*/
+
+        private bool AuthenticateUser(string account, string password)
+        {
+            //return (account == "test" && password == "0000");
+            try
+            {
+                // 設定 LDAP 伺服器的路徑，使用 636 端口（SSL 加密）或 389 端口（非加密）
+                string ldapPath = "LDAP://yourdcserver.com.tw:636";
+
+                // 使用者的完整帳號，格式為帳號@域名。這是 AD 中的識別方法
+                string domainAndUsername = account + "@rmtech.com.tw";
+
+                // 建立 DirectoryEntry 物件，代表對 AD 伺服器的連線
+                // 這裡使用提供的帳號、密碼以及 SecureSocketsLayer 選項（SSL 加密）進行驗證
+                using (DirectoryEntry entry = new DirectoryEntry(ldapPath, domainAndUsername, password, AuthenticationTypes.SecureSocketsLayer))
+                {
+                    // 嘗試綁定（Bind）以驗證用戶
+                    // 通過綁定動作，嘗試確定提供的帳號和密碼是否有效並具有存取權限
+                    // 如果驗證成功，entry.NativeObject 將返回一個對象，否則會拋出例外。
+                    object obj = entry.NativeObject;
+
+                    // 如果上面的綁定操作未拋出例外，表示驗證成功，可以返回 true
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                // 如果在驗證過程中出現例外，表示驗證失敗，返回 false
                 return false;
             }
         }
@@ -172,6 +205,14 @@ namespace SingleSignOn
                     Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(returnUrlCookie);
+
+                // 清除儲存在cookie中的userInformation
+                HttpCookie userInformationCookie = new HttpCookie("UserInformation")
+                {
+                    Expires = DateTime.Now.AddDays(-1),
+                    Domain = "localhost"
+                };
+                HttpContext.Current.Response.Cookies.Add(userInformationCookie);
             }
         }
 

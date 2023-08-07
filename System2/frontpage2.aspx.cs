@@ -22,10 +22,28 @@ namespace SingleSignOn
             {
                 if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                 {
-                    title.Text = "Welcome to System2!";
+                    if (Request.Cookies["UserInformation"] != null)
+                    {
+                        string userFullName = Request.Cookies["UserInformation"]["FullName"];
+                        title.Text = userFullName + ", Welcome to System2!";
+                    }
+                    else
+                    {
+                        title.Text = "Welcome to System2!";
+                    }
                 }
-
-                title.Text = "Welcome to System2!";
+                else
+                {
+                    if (Request.Cookies["UserInformation"] != null)
+                    {
+                        string userFullName = Request.Cookies["UserInformation"]["FullName"];
+                        title.Text = userFullName + ", Welcome to System2!";
+                    }
+                    else
+                    {
+                        title.Text = "Welcome to System2!";
+                    }
+                }
             }
         }
 
