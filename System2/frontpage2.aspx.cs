@@ -15,8 +15,10 @@ namespace SingleSignOn
                     string loginUrl = Request.QueryString["returnUrl"];
                     Response.Redirect(loginUrl);
                 }
-
-                Response.Redirect("login2.aspx");
+                else
+                {
+                    Response.Redirect("login2.aspx");
+                }
             }
             else
             {
@@ -49,8 +51,6 @@ namespace SingleSignOn
 
         protected void Btn_Logout_Click(object sender, EventArgs e)
         {
-            TokenManager.CentralizedLogout();
-
             if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
                 string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
@@ -63,29 +63,34 @@ namespace SingleSignOn
                     if (isAzureADLogin)
                     {
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+                        string cleanCookieUri = "https://localhost:44345/Logout.aspx";
 
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
                             string returnUrl = Request.QueryString["returnUrl"];
-                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                         else
                         {
                             string returnUrl = "https://localhost:44343/login2.aspx";
-                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                     }
                     else
                     {
+                        TokenManager.CentralizedLogout();
+
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
                             string returnUrl = Request.QueryString["returnUrl"];
                             Response.Redirect(returnUrl);
                         }
-
-                        Response.Redirect("login2.aspx");
+                        else
+                        {
+                            Response.Redirect("login2.aspx");
+                        }
                     }
                 }
             }

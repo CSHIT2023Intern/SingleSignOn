@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using static SingleSignOn.Login;
 
 namespace SingleSignOn
@@ -44,8 +40,6 @@ namespace SingleSignOn
 
         protected void Btn_Logout_Click(object sender, EventArgs e)
         {
-            TokenManager.CentralizedLogout();
-
             if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
                 string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
@@ -57,13 +51,16 @@ namespace SingleSignOn
                     if (isAzureADLogin)
                     {
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
-                        string redirectUri = "https://localhost:44345/Login.aspx"; // 設定為登出後的回調 URL
-                        string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(redirectUri)}";
+                        string cleanCookieUri = "https://localhost:44345/Logout.aspx";
+                        string redirectUri = "https://localhost:44345/Login.aspx";
+                        string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(redirectUri)}";
 
                         Response.Redirect(logoutUrl);
                     }
                     else
                     {
+                        TokenManager.CentralizedLogout();
+
                         Response.Redirect("Login.aspx");
                     }
                 }
