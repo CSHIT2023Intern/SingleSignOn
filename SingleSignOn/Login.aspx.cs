@@ -40,8 +40,6 @@ namespace SingleSignOn
 
             if (AuthenticateUser(account, password))
             {
-                Session["login"] = true;
-
                 TokenManager tokenManager = new TokenManager();
 
                 bool isAzureADLogin = false;
@@ -57,7 +55,7 @@ namespace SingleSignOn
                 }
                 else
                 {
-                    string returnUrl = "https://localhost:44345/Frontpage.aspx";
+                    string returnUrl = "https://localhost:44345/Index.aspx";
                     string redirectUrl = $"https://localhost:44345/Login.aspx?returnUrl={returnUrl}?token={HttpUtility.UrlEncode(token)}";
                     Response.Redirect(redirectUrl);
                 }

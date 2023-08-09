@@ -29,7 +29,7 @@ namespace SingleSignOn
                             Response.Redirect("https://localhost:44396/index1.aspx?returnUrl=" + returnUrl);
                         }
 
-                        Response.Redirect("web1.aspx");
+                        Response.Redirect("index1.aspx");
                     }
 
                     Response.Redirect("https://localhost:44345/Login.aspx");

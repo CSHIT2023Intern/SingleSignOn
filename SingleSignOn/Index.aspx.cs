@@ -8,10 +8,6 @@ namespace SingleSignOn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // 设置缓存策略，禁止浏览器缓存
-            Response.Cache.SetNoStore();
-            Response.Cache.SetCacheability(HttpCacheability.NoCache);
-
             if (Request.Cookies[TokenManager.TokenCookieName] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -21,11 +17,11 @@ namespace SingleSignOn
                 if (Request.Cookies["UserInformation"] != null)
                 {
                     string userFullName = Request.Cookies["UserInformation"]["FullName"];
-                    title.Text = userFullName + ", Welcome to SingleSignOn!";
+                    welcomeLabel.Text = userFullName + ", Welcome to SingleSignOn!";
                 }
                 else
                 {
-                    title.Text = "Welcome to SingleSignOn!";
+                    welcomeLabel.Text = "Welcome to SingleSignOn!";
                 }
             }
         }

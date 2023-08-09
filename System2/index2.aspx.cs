@@ -63,17 +63,16 @@ namespace SingleSignOn
                     if (isAzureADLogin)
                     {
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
+                        string cleanCookieUri = "https://localhost:44345/Logout.aspx";
 
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
-                            string cleanCookieUri = "https://localhost:44345/Logout.aspx";
                             string returnUrl = Request.QueryString["returnUrl"];
                             string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                         else
                         {
-                            string cleanCookieUri = "https://localhost:44345/Logout.aspx";
                             string returnUrl = "https://localhost:44343/web2.aspx";
                             string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
