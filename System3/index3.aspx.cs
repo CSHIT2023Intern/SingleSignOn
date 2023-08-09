@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using static SingleSignOn.Login;
 
 namespace SingleSignOn
@@ -14,19 +10,47 @@ namespace SingleSignOn
         {
             if (Request.Cookies[TokenManager.TokenCookieName] == null)
             {
-                string returnUrl = Request.QueryString["returnUrl"];
-                Response.Redirect(string.IsNullOrEmpty(returnUrl) ? "web3.aspx" : returnUrl);
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                {
+                    string loginUrl = Request.QueryString["returnUrl"];
+                    Response.Redirect(loginUrl);
+                }
+                else
+                {
+                    Response.Redirect("web3.aspx");
+                }
             }
             else
             {
-                welcomeLabel.Text = "Welcome to System 3!";
+                if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+                {
+                    if (Request.Cookies["UserInformation"] != null)
+                    {
+                        string userFullName = Request.Cookies["UserInformation"]["FullName"];
+                        welcomeLabel.Text = userFullName + ", Welcome to System3!";
+                    }
+                    else
+                    {
+                        welcomeLabel.Text = "Welcome to System3!";
+                    }
+                }
+                else
+                {
+                    if (Request.Cookies["UserInformation"] != null)
+                    {
+                        string userFullName = Request.Cookies["UserInformation"]["FullName"];
+                        welcomeLabel.Text = userFullName + ", Welcome to System3!";
+                    }
+                    else
+                    {
+                        welcomeLabel.Text = "Welcome to System3!";
+                    }
+                }
             }
         }
 
         protected void LogoutButton_Click(object sender, EventArgs e)
         {
-            TokenManager.CentralizedLogout();
-
             if (Request.Cookies[TokenManager.TokenCookieName] != null)
             {
                 string token = TokenHelper.DecryptToken(Request.Cookies[TokenManager.TokenCookieName].Value);
@@ -38,24 +62,27 @@ namespace SingleSignOn
 
                     if (isAzureADLogin)
                     {
-                        // 取得 Azure AD 登出 URL
                         string authority = "https://login.microsoftonline.com/410d1846-1236-446b-85d6-b3aa69060f16";
 
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
+                            string cleanCookieUri = "https://localhost:44345/Logout.aspx";
                             string returnUrl = Request.QueryString["returnUrl"];
-                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                         else
                         {
-                            string returnUrl = "https://localhost:44343/web2.aspx";
-                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            string cleanCookieUri = "https://localhost:44345/Logout.aspx";
+                            string returnUrl = "https://localhost:44343/web3.aspx";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                     }
                     else
                     {
+                        TokenManager.CentralizedLogout();
+
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
                             string returnUrl = Request.QueryString["returnUrl"];
@@ -63,7 +90,7 @@ namespace SingleSignOn
                         }
                         else
                         {
-                            Response.Redirect("web2.aspx");
+                            Response.Redirect("web3.aspx");
                         }
                     }
                 }

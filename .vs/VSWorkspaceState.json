@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\graph-tutorial",
+    "\\graph-tutorial\\Controllers",
     "\\SingleSignOn"
   ],
-  "SelectedNode": "\\SingleSignOn\\SingleSignOn.sln",
+  "SelectedNode": "\\SingleSignOn\\Index.aspx.cs",
   "PreviewInSolutionExplorer": false
 }

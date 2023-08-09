@@ -635,8 +635,8 @@ C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\bi
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\bin\zh-Hant\System.Web.WebPages.resources.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\bin\zh-Hant\System.Web.WebPages.Deployment.resources.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\bin\zh-Hant\System.Web.WebPages.Razor.resources.dll
-C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.csprojAssemblyReference.cache
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.csproj.CoreCompileInputs.cache
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.csproj.CopyComplete
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.pdb
+C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\SingleSignOn\obj\Debug\SingleSignOn.csproj.AssemblyReference.cache

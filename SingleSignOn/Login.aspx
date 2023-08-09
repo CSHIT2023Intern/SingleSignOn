@@ -38,7 +38,7 @@
             <asp:Button ID="loginbtn" runat="server" Text="登入" Style="border: none;" OnClick="LoginButton_Click" />
         </p>
         <p>
-            <asp:Button ID="adbtn" runat="server" Text="以 AD 帳號登入" OnClick="ADButton_Click" />
+            <asp:Button ID="adbtn" runat="server" Text="以 AAD 帳號登入" OnClick="AADButton_Click" />
         </p>
         <br />
     </form>

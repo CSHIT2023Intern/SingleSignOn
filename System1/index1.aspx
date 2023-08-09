@@ -87,7 +87,7 @@
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <asp:Button ID="web2btn" runat="server" Text="學生選課系統" OnClick="Web2btn_Click" />
+                            <%--<asp:Button ID="web2btn" runat="server" Text="學生選課系統" OnClick="Web2btn_Click" />--%>
                         </div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
                     </h2>
                     <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <asp:Button ID="web3btn" runat="server" Text="數位學習系統(LMS)" OnClick="Web3btn_Click" />
+                            <%--<asp:Button ID="web3btn" runat="server" Text="數位學習系統(LMS)" OnClick="Web3btn_Click" />--%>
                         </div>
                     </div>
                 </div>

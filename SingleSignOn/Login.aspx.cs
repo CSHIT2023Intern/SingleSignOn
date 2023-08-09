@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Web;
 using System.Text;
-using System.Configuration;
-using System.Collections.Generic;
-using Microsoft.Identity.Client;
 using System.IO;
 using System.Security.Cryptography;
-using System.Data.SqlTypes;
 using System.Web.UI;
+using System.DirectoryServices;
 
 namespace SingleSignOn
 {
@@ -26,8 +23,12 @@ namespace SingleSignOn
                 {
                     string returnUrl = Request.QueryString["returnUrl"];
 
-                    Response.Redirect(returnUrl);
+                    if (Request.Cookies[TokenManager.TokenCookieName] != null)
+                    {
+                        Response.Redirect(returnUrl);
+                    }
                 }
+
                 Response.Redirect("Index.aspx");
             }
         }
@@ -39,13 +40,27 @@ namespace SingleSignOn
 
             if (AuthenticateUser(account, password))
             {
+                Session["login"] = true;
+
                 TokenManager tokenManager = new TokenManager();
+
                 bool isAzureADLogin = false;
                 string token = tokenManager.GenerateToken(account, isAzureADLogin);
+
                 tokenManager.StoreToken(token);
 
-                string returnUrl = Request.QueryString["returnUrl"] ?? "https://localhost:44345/Index.aspx";
-                Response.Redirect($"{returnUrl}?token={HttpUtility.UrlEncode(token)}");
+                if (Request.QueryString["returnUrl"] != null)
+                {
+                    string returnUrl = Request.QueryString["returnUrl"];
+                    string redirectUrl = $"{returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                    Response.Redirect(redirectUrl);
+                }
+                else
+                {
+                    string returnUrl = "https://localhost:44345/Frontpage.aspx";
+                    string redirectUrl = $"https://localhost:44345/Login.aspx?returnUrl={returnUrl}?token={HttpUtility.UrlEncode(token)}";
+                    Response.Redirect(redirectUrl);
+                }
             }
             else if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(password))
             {
@@ -57,31 +72,76 @@ namespace SingleSignOn
             }
         }
 
-        protected void ADButton_Click(object sender, EventArgs e)
+        protected void AADButton_Click(object sender, EventArgs e)
         {
-            string returnUrl = Request.QueryString["returnUrl"] ?? "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
-            HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl)
+            if (Request.QueryString["returnUrl"] != null)
             {
-                Domain = "localhost"
-            };
-            Response.Cookies.Add(returnUrlCookie);
-            Response.Redirect("https://localhost:44342/");
+                string returnUrl = Request.QueryString["returnUrl"];
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44367/");
+            }
+            else
+            {
+                string returnUrl = "https://localhost:44345/Login.aspx?returnUrl=https://localhost:44345/Index.aspx";
+                HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie", returnUrl);
+                Response.Cookies.Add(returnUrlCookie);
+                Response.Redirect("https://localhost:44367/");
+            }
         }
 
+
+        //AD 驗證
         private bool AuthenticateUser(string account, string password)
         {
-            return (account == "test" && password == "0000");
+            //return (account == "test" && password == "0000");
+
+            try
+            {
+                // 設定 LDAP 伺服器的路徑，使用 636 端口（SSL 加密）或 389 端口（非加密）
+                string ldapPath = "LDAP://yourdcserver.com.tw:636";
+
+                // 使用者的完整帳號，格式為帳號@域名
+                string domainAndUsername = account + "@rmtech.com.tw";
+
+                // 建立 DirectoryEntry 物件，代表對 AD 伺服器的連線
+                // 這裡使用提供的帳號、密碼以及 SecureSocketsLayer 選項（SSL 加密）進行驗證
+                using (DirectoryEntry entry = new DirectoryEntry(ldapPath, domainAndUsername, password, AuthenticationTypes.SecureSocketsLayer))
+                {
+                    // 嘗試綁定（Bind）以驗證用戶
+                    // 通過綁定動作，嘗試確定提供的帳號和密碼是否有效並具有存取權限
+                    // 如果驗證成功，entry.NativeObject 將返回一個對象，否則拋出例外
+                    object obj = entry.NativeObject;
+
+                    // 如果上面的綁定操作未拋出例外，表示驗證成功，返回 true
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                // 如果在驗證過程中出現例外，表示驗證失敗，返回 false
+                return false;
+            }
         }
 
-        // Token的產生、儲存、驗證
+        // Token 生成、儲存、驗證
         public class TokenManager
         {
             public static readonly string TokenCookieName = "CookieToken";
 
+            // 靜態字典，用來追踪使用者帳號對應的Token
+            // private static readonly Dictionary<string, string> activeUserTokens = new Dictionary<string, string>();
+
             public string GenerateToken(string account, bool isAzureADLogin)
             {
                 string tokenData = $"{account}_{Guid.NewGuid()}_{isAzureADLogin}";
+
+                // 將 token 資料加密
                 string encryptedToken = TokenHelper.EncryptToken(tokenData);
+
+                // 儲存加密後的 token
+                // activeUserTokens[userAcc] = encryptedToken;
+
                 return encryptedToken;
             }
 
@@ -112,7 +172,7 @@ namespace SingleSignOn
                     {
                         account = storeTokenData[0];
 
-                        // 驗證 cookie中的token 與 帶回來的token
+                        // 驗證 cookie中的token 與 回傳的token
                         if (returnTokenData[1] == storeTokenData[1])
                         {
                             return true;
@@ -125,7 +185,7 @@ namespace SingleSignOn
 
             public static void CentralizedLogout()
             {
-                // 清除儲存在 cookie 中的 token
+                // 清除儲存在cookie中的token
                 HttpCookie tokenCookie = new HttpCookie(TokenCookieName)
                 {
                     Expires = DateTime.Now.AddDays(-1),
@@ -133,17 +193,25 @@ namespace SingleSignOn
                 };
                 HttpContext.Current.Response.Cookies.Add(tokenCookie);
 
-                // 清除儲存在 cookie 中的 returnUrl
+                // 清除儲存在cookie中的returnUrl
                 HttpCookie returnUrlCookie = new HttpCookie("ReturnUrlCookie")
                 {
                     Expires = DateTime.Now.AddDays(-1),
                     Domain = "localhost"
                 };
                 HttpContext.Current.Response.Cookies.Add(returnUrlCookie);
+
+                // 清除儲存在cookie中的userInformation
+                HttpCookie userInformationCookie = new HttpCookie("UserInformation")
+                {
+                    Expires = DateTime.Now.AddDays(-1),
+                    Domain = "localhost"
+                };
+                HttpContext.Current.Response.Cookies.Add(userInformationCookie);
             }
         }
 
-        // 加解密 Token
+        // 加解密Token
         public class TokenHelper
         {
             private const string EncryptionKey = "123456789"; // 加密金鑰
@@ -177,8 +245,8 @@ namespace SingleSignOn
                 using (Aes encryptor = Aes.Create())
                 {
                     Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] {
-                0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
-            });
+                        0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
+                    });
                     encryptor.Key = pdb.GetBytes(32);
                     encryptor.IV = pdb.GetBytes(16);
 

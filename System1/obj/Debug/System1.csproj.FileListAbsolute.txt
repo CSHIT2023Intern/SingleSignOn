@@ -558,8 +558,8 @@ C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\bin\zh-
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\bin\zh-Hant\System.Web.WebPages.resources.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\bin\zh-Hant\System.Web.WebPages.Deployment.resources.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\bin\zh-Hant\System.Web.WebPages.Razor.resources.dll
-C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.csprojAssemblyReference.cache
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.csproj.CoreCompileInputs.cache
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.csproj.CopyComplete
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.dll
 C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.pdb
+C:\Users\吳旻璇\Desktop\實習\CSHIT\Project\SingleSignOn0728\System1\obj\Debug\System1.csproj.AssemblyReference.cache

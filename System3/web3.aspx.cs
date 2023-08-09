@@ -17,21 +17,26 @@ namespace SingleSignOn
                 if (Request.Cookies[TokenManager.TokenCookieName] != null)
                 {
                     string token = Request.Cookies[TokenManager.TokenCookieName].Value;
+
                     TokenManager tokenManager = new TokenManager();
-                    if (tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account))
+
+                    bool isValidToken = tokenManager.ValidateToken(new HttpRequestWrapper(Request), token, out string account);
+
+                    if (isValidToken == true)
                     {
+                        // 儲存使用者帳號名稱
                         Session["user"] = account;
+
                         if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
                         {
                             string returnUrl = Request.QueryString["returnUrl"];
                             Response.Redirect("https://localhost:44391/index3.aspx?returnUrl=" + returnUrl);
                         }
-                        Response.Redirect("index3.aspx");
+
+                        Response.Redirect("web3.aspx");
                     }
-                    else
-                    {
-                        Response.Redirect("https://localhost:44345/Login.aspx");
-                    }
+
+                    Response.Redirect("https://localhost:44345/Login.aspx");
                 }
                 else
                 {
