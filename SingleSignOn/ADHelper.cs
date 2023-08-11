@@ -26,14 +26,17 @@ namespace SingleSignOn
                 if (sr != null)
                 {
                     result = true;
-                    // 取得使用者資訊
+
+                    // 將使用者資訊儲存在cookie
                     string displayName = sr.Properties["cn"][0].ToString();
-                    // 在此處新增其他使用者資訊
+                    HttpCookie userInformationCookie = new HttpCookie("UserInformation");
+                    userInformationCookie.Values["FullName"] = displayName;
+                    userInformationCookie.Expires = DateTime.Now.AddHours(1);
+                    HttpContext.Current.Response.Cookies.Add(userInformationCookie);
                 }
             }
             catch (Exception ex)
             {
-                // 向使用者顯示例外訊息
                 ShowErrorMessageToUser($"An error occurred: {ex.Message}");
             }
             finally

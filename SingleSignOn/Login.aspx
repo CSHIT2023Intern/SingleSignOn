@@ -26,11 +26,11 @@
         <br />
         <p>
             <asp:Label ID="accountLabel" runat="server" AssociatedControlID="accountTextBox" Text="帳號：" Style="font-size: 20px;" />
-            <asp:TextBox ID="accountTextBox" runat="server" Style="padding: 3px; border-radius: 3px; font-size: 18px; font-family: 'Times New Roman', 'DFKai-sb';" onKeyUp="value=value.replace(/[\W]/g,'') " />
+            <asp:TextBox ID="accountTextBox" runat="server" Style="padding: 3px; border-radius: 3px; font-size: 18px; font-family: 'Times New Roman', 'DFKai-sb';" />
         </p>
         <p>
             <asp:Label ID="passwordLabel" runat="server" AssociatedControlID="passwordTextBox" Text="密碼：" Style="font-size: 20px;" />
-            <asp:TextBox ID="passwordTextBox" runat="server" TextMode="Password" Style="padding: 3px; border-radius: 3px; font-size: 18px; font-family: 'Times New Roman', 'DFKai-sb';" onKeyUp="value=value.replace(/[\W]/g,'') " />
+            <asp:TextBox ID="passwordTextBox" runat="server" TextMode="Password" Style="padding: 3px; border-radius: 3px; font-size: 18px; font-family: 'Times New Roman', 'DFKai-sb';" />
         </p>
         <br />
         <br />

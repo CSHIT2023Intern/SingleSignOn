@@ -25,6 +25,7 @@ namespace SingleSignOn
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
 
+        // 處理跨域請求 CORS
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
@@ -34,6 +35,14 @@ namespace SingleSignOn
                 HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
                 HttpContext.Current.Response.AddHeader("Access-Control-Max-Age", "1728000");
                 HttpContext.Current.Response.End();
+            }
+        }
+
+        protected void Application_BeginRequest()
+        {
+            if (Request.Headers.AllKeys.Contains("Origin") && Request.HttpMethod == "OPTIONS")
+            {
+                Response.End();
             }
         }
     }
