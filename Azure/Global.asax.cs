@@ -19,7 +19,7 @@ namespace Azure
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             // ±Ò¥Î TLS 1.2
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
     }
 }
