@@ -74,7 +74,7 @@ namespace SingleSignOn
                         else
                         {
                             string returnUrl = "https://localhost:44396/login1.aspx";
-                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(returnUrl)}";
+                            string logoutUrl = $"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={HttpUtility.UrlEncode(cleanCookieUri)}?redirectUrl={HttpUtility.UrlEncode(returnUrl)}";
                             Response.Redirect(logoutUrl);
                         }
                     }

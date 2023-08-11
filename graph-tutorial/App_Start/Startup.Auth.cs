@@ -91,8 +91,8 @@ namespace graph_tutorial
                 .WithClientSecret(appSecret)
                 .Build();
 
-            var signedInUser = new ClaimsPrincipal(notification.AuthenticationTicket.Identity);
-            var tokenStore = new SessionTokenStore(idClient.UserTokenCache, HttpContext.Current, signedInUser);
+            //var signedInUser = new ClaimsPrincipal(notification.AuthenticationTicket.Identity);
+            //var tokenStore = new SessionTokenStore(idClient.UserTokenCache, HttpContext.Current, signedInUser);
 
             try
             {
@@ -103,8 +103,8 @@ namespace graph_tutorial
 
                 var userDetails = await GraphHelper.GetUserDetailsAsync(result.AccessToken);
 
-                tokenStore.SaveUserDetails(userDetails);
-                notification.HandleCodeRedemption(null, result.IdToken);
+                //tokenStore.SaveUserDetails(userDetails);
+                //notification.HandleCodeRedemption(null, result.IdToken);
 
                 // Store DisplayName in a cookie
                 var userInformationCookie = new HttpCookie("UserInformation");
@@ -152,44 +152,5 @@ namespace graph_tutorial
                 notification.Response.Redirect($"/Home/Error?message={message}&debug={ex.Message}");
             }
         }
-
-        /*
-        private async Task OnAuthorizationCodeReceivedAsync(AuthorizationCodeReceivedNotification notification)
-        {
-            var idClient = ConfidentialClientApplicationBuilder.Create(appId)
-                .WithRedirectUri(redirectUri)
-                .WithClientSecret(appSecret)
-                .Build();
-
-            string message;
-            string debug;
-
-            try
-            {
-                string[] scopes = graphScopes.Split(' ');
-
-                var result = await idClient.AcquireTokenByAuthorizationCode(
-                    scopes, notification.Code).ExecuteAsync();
-
-                var userDetails = await GraphHelper.GetUserDetailsAsync(result.AccessToken);
-
-                message = "User info retrieved.";
-                debug = $"User: {userDetails.DisplayName}, Email: {userDetails.Email}";
-            }
-            catch (MsalException ex)
-            {
-                message = "AcquireTokenByAuthorizationCodeAsync threw an exception";
-                debug = ex.Message;
-            }
-
-            var queryString = $"message={message}&debug={debug}";
-            if (queryString.Length > 2048)
-            {
-                queryString = queryString.Substring(0, 2040) + "...";
-            }
-
-            notification.HandleResponse();
-            notification.Response.Redirect($"/Home/Error?{queryString}");
-        }*/
     }
 }
